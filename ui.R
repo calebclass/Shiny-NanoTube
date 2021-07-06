@@ -1,4 +1,5 @@
 library(shinyBS)
+library(shinyjs)
 library(Biobase)
 library(limma)
 library(plotly)
@@ -7,10 +8,32 @@ library(DT)
 library(NanoTube)
 source("helpers.R")
 
-shinyUI(navbarPage("Shiny-NanoTube", id="master",
+shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
+                  
+             navbarPage(div(img(src="NanoTube-Logo.png", 
+                                style="float:right", height = 40, width = 110), ""),
+                        tags$head(
+                          tags$style(HTML('.navbar-nav > li > a, .navbar-brand {
+                            padding-top:4px !important; 
+                            padding-bottom:4px !important;
+                            line-height: 40px !important;
+                            height: 40px;
+                            font-size: 15px;
+                            }
+                           .navbar {min-height:50px !important;}'))),
+                        selected = "Job Setup",
+                        id = "master",
+                   
+                        useShinyjs(),
+                        
+                   #tags$head(
+                   #   tags$link(rel = "stylesheet", type = "text/css", href = "styling.css")
+                   #),
+                   #tags$style(type="text/css", "body {padding-top: 70px;}"),
+                   
                    tabPanel("Job Setup",
-                            fluidPage(
                               
+                            fluidPage(
                               h2("Data Entry"),
                               
                               fileInput("expr",
@@ -35,7 +58,7 @@ shinyUI(navbarPage("Shiny-NanoTube", id="master",
                                                  label = "Base group",
                                                  value = ""),
                                        bsTooltip("basePhen",
-                                                 "The group against which other groups will be compared (such as the Control group). If not provided, the first group will be used.",
+                                                 "The group against which other groups will be compared, or the denominator of your Fold Change (such as the Control group). If empty, the first group will be used.",
                                                  placement = "bottom", trigger = "hover", options = NULL)
                                 )
                                 
@@ -53,10 +76,11 @@ shinyUI(navbarPage("Shiny-NanoTube", id="master",
                                            label = "Analyze Data"),
                               #submitButton("Analyze Data"),
                               
-                              h3("Advanced Options"),
-                              ### Add action button for conditional input
+                              br(), br(),
                               
-                              h4("Normalization Options"),
+                              actionLink("adv", "Advanced Options"),
+                              
+                              h4("Normalization Options", id = "normTxt"),
                               
                               textInput("hk",
                                         label = "Housekeeping Genes",
@@ -72,7 +96,7 @@ shinyUI(navbarPage("Shiny-NanoTube", id="master",
                               bsTooltip("bgP",
                                         "Expression threshold (vs. negative control genes) for inclusion, in the form of a p-value from a 2-sample t test (see Help). To include all genes in analysis, set to 2."),
                               
-                              h4("Gene Set Analysis Options"),
+                              h4("Gene Set Analysis Options", id = "gseaTxt"),
                               
                               numericInput("minSize",
                                            label = "Min size (exclude smaller sets)",
@@ -117,6 +141,7 @@ shinyUI(navbarPage("Shiny-NanoTube", id="master",
                                          fluidRow(
                                            column(8,
                                                   plotlyOutput("hkPlot1", width = "100%"),
+                                                  br(),br(),
                                                   plotlyOutput("hkPlot2", width = "100%")
                                            ),
                                            
@@ -129,7 +154,7 @@ shinyUI(navbarPage("Shiny-NanoTube", id="master",
                    
 
                    tabPanel("Analysis Results",
-                            navbarPage("DE", id = "de",
+                            navbarPage("Analysis", id = "de",
                                        tabPanel("PCA",
                                                 fluidPage(
                                                   plotlyOutput("pcaPlot")
@@ -138,7 +163,10 @@ shinyUI(navbarPage("Shiny-NanoTube", id="master",
                                        
                                        tabPanel("Differential Expression",
                                                 fluidPage(
+                                                  h4("Differentially expressed genes (q < 0.05)"),
                                                   tableOutput("deCounts"),
+                                                  
+                                                  h4("Full Results"),
                                                   DTOutput("deTab")
                                                 )
                                        ),
@@ -173,3 +201,4 @@ shinyUI(navbarPage("Shiny-NanoTube", id="master",
 )
 )
 
+)

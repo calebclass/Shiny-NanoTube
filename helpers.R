@@ -1,91 +1,33 @@
-positiveQC <- function(ns) {
-  dat.pos <- as.data.frame(log2(ns$dat$exprs.raw[ns$dat$dict.raw$CodeClass == "Positive",]))
-  dat.pos$Expected <- log2(as.numeric(gsub(".*\\(|\\)", "", ns$dat$dict.raw$Name[ns$dat$dict.raw$CodeClass == "Positive"])))
-  
-  dat.pos.df <- reshape::melt(dat.pos, "Expected")
-  colnames(dat.pos.df)[2:3] <- c("Sample", "Observed")
-  
-  samps <- unique(dat.pos.df$Sample)
-  xmin <- min(dat.pos.df$Expected)
-  xmax <- max(dat.pos.df$Expected)
-  ymax <- max(dat.pos.df$Observed)
-  
-  pos.height <- (ncol(dat.pos)-1) * 2/3
-  
-  # Scale factor table
-  pos.tab <- data.frame(Sample = names(ns$dat$pc.scalefactors),
-                        `Scale Factor` = round(ns$dat$pc.scalefactors, 2))
-  
-  pos.plot <- ggplot(data=dat.pos.df, aes(x=Expected, y=Observed)) +
-    geom_point(colour = "black", fill = "grey70", pch=21, size=3) + 
-    facet_wrap(~ Sample, ncol = 3) + 
-    xlim(xmin, xmax) + ylim(0, ymax) + theme_bw()
-  
-  return(list(tab = pos.tab,
-              plt = pos.plot))
-}
-
-
-negativeQC <- function(ns) {
-  # Strip plot for negative control genes
-  dat.neg <- as.data.frame(ns$dat$exprs.raw[ns$dat$dict.raw$CodeClass == "Negative",])
-  dat.neg$Gene <- ns$dat$dict.raw$Name[ns$dat$dict.raw$CodeClass == "Negative"]
-  
-  dat.neg.df <- reshape::melt(dat.neg, "Gene")
-  colnames(dat.neg.df)[2:3] <- c("Sample", "Count")
-  
-  
-  # Negative Table
-  neg.tab <- round(ns$bg.stats[,1:4], 2)
-  neg.tab$fail <- paste0(ns$bg.stats$num.less.bg, " (",
-                         round(ns$bg.stats$frc.less.bg*100, 1), "%)")
-  colnames(neg.tab) <- c("Mean (Neg)", "Max (Neg)", "sd (Neg)", "BG (Mean+2sd)", 
-                         "Genes below BG (%)")
-  
-  neg1 <- ggplot(data = dat.neg.df, aes(x=Count, y=Sample, 
-                                        text=paste0("Sample: ", Sample, "\nGene: ", Gene, "\nCount: ", Count))) +
-    geom_jitter(height = 0.2, width = 0, colour = "black", fill = "grey70", pch=21) +
-    theme_classic() + ylab("") 
-  
-  #neg.plot <- div(ggplotly(neg1, tooltip = c("text"), width = 550, height = 400) %>% 
-  #            layout(margin = list(l=90), autosize = FALSE), 
-  #                    align="center")
-  neg.plot <- ggplotly(neg1, tooltip = c("text"), width = 550, height = 400) %>% 
-    layout(margin = list(l=90), autosize = FALSE)
-  
-  return(list(tab = neg.tab,
-              plt = neg.plot))
-}
-
-
 housekeepingQC <- function(ns) {
-  hk.tab <- data.frame(Sample = names(ns$dat$hk.scalefactors),
-                       `Scale Factor` = round(ns$dat$hk.scalefactors, 2))
+  hk.tab <- data.frame(Sample = names(ns$hk.scalefactors),
+                       `Scale Factor` = round(ns$hk.scalefactors, 2))
   
-  boxplot.dat <- as.data.frame(log2(ns$dat$exprs.raw+0.5))
-  boxplot.dat$CodeClass <- ns$dat$dict.raw$CodeClass
+  boxplot.dat <- as.data.frame(log2(ns$exprs.raw+0.5))
+  boxplot.dat$CodeClass <- ns$dict.raw$CodeClass
   boxplot.df <- reshape::melt(boxplot.dat, "CodeClass")
   
   b1 <- ggplot() +
     geom_boxplot(data=boxplot.df[boxplot.df$CodeClass == "Endogenous",], 
                  aes(x=variable, y=value), fill="grey70") + 
     theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
+    ggtitle("Pre-Normalization Data") +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
   
   ggplotly(b1) %>% 
     layout(margin = list(b=90))
   
-  boxplot.dat <- log2(ns$dat$exprs[ns$dat$dict$CodeClass == "Endogenous",]+0.5)
+  boxplot.dat <- log2(ns$exprs[ns$dict$CodeClass == "Endogenous",]+0.5)
   boxplot.df <- reshape::melt(boxplot.dat)
   
-  samp.df <- data.frame(sample = rep(colnames(boxplot.dat),times=2),
-                        scaleFactor = c(rep("Positive Control", times=ncol(boxplot.dat)), rep("Housekeeping", times=ncol(boxplot.dat))),
-                        dat = c(ns$dat$pc.scalefactors,
-                                hk.scaleFactor = ns$dat$hk.scalefactors))
+#  samp.df <- data.frame(sample = rep(colnames(boxplot.dat),times=2),
+#                        scaleFactor = c(rep("Positive Control", times=ncol(boxplot.dat)), rep("Housekeeping", times=ncol(boxplot.dat))),
+#                        dat = c(ns$pc.scalefactors,
+#                                hk.scaleFactor = ns$hk.scalefactors))
   
   b2 <- ggplot() +
     geom_boxplot(data=boxplot.df, aes(x=X2, y=value), fill="grey70") + 
     theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
+    ggtitle("Normalized Data")
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
   
   ggplotly(b2) %>% 
@@ -98,14 +40,14 @@ housekeepingQC <- function(ns) {
 
 
 plotPCA <- function(ns) {
-  pca.dat <- log2(ns$dat$exprs[ns$dat$dict$CodeClass == "Endogenous" &
-                                 rowSums(ns$dat$exprs == 0) == 0,]+0.5)
+  pca.dat <- log2(exprs(ns$dat)[fData(ns$dat)$CodeClass == "Endogenous" &
+                                 rowSums(exprs(ns$dat) == 0) == 0,]+0.5)
   
   pca <- prcomp(t(pca.dat),
                 center = TRUE, scale = TRUE)
   pca.ly <- as.data.frame(pca$x[,1:2])
   pca.ly$sample <- row.names(pca$x)
-  pca.ly$group <- ns$deRes$sampleData$group
+  pca.ly$group <- pData(ns$deRes$eset)$group
   
   perc.var <- pca$sdev^2 / sum(pca$sdev^2) * 100
   
@@ -133,7 +75,17 @@ plotPCA <- function(ns) {
 deRes <- function(ns) {
   diffExpr.tab <- rbind(colSums(ns$deRes$q.value < 0.05 & ns$deRes$coefficients > 0),
                         colSums(ns$deRes$q.value < 0.05 & ns$deRes$coefficients < 0))
-  rownames(diffExpr.tab) <- c("Higher in Group", paste0("Higher in ", ns$base.group))
+  diffExpr.tab <- as.data.frame(diffExpr.tab[,!(colnames(diffExpr.tab) %in% c("Intercept", "(Intercept)"))])
+  
+  if (ncol(diffExpr.tab) == 1) {
+    colnames(diffExpr.tab) <- ""
+    rownames(diffExpr.tab) <- c(paste0("Higher in ", colnames(ns$deRes$q.value)[!(colnames(ns$deRes$q.value) %in% c("Intercept", "(Intercept)"))]),
+                                 paste0("Higher in ", ns$base.group))
+  } else {
+    rownames(diffExpr.tab) <- c("Higher in Group", 
+                                paste0("Higher in ", ns$base.group))
+  }
+  
   
   #knitr::kable(diffExpr.tab[,-1], padding=2, format="html", 
   #             col.names = ifelse(ncol(diffExpr.tab)==2, yes = "", no = NA)) %>%
@@ -156,12 +108,7 @@ deRes <- function(ns) {
                 backgroundColor = styleInterval(brks.fc, cols.fc)) %>%
     formatStyle(names(diffExpr.full)[substr(names(diffExpr.full), 1, 5) == "q-val"], 
                 backgroundColor = styleInterval(brks.qv, cols.qv))
-  
-  #renderDT({
-  #  dtable
-  #}, rownames = TRUE
-  #)
-  
+
   return(list(summary = diffExpr.tab,
               de = dtable))
   

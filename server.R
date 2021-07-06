@@ -1,6 +1,22 @@
 shinyServer(
   function(input, output, session) {
     
+    hide(id = "normTxt")
+    hide(id = "hk")
+    hide(id = "bgP")
+    hide(id = "gseaTxt")
+    hide(id = "minSize")
+    hide(id = "setThresh")
+    
+    observeEvent(input$adv, {
+      toggle(id = "normTxt")
+      toggle(id = "hk")
+      toggle(id = "bgP")
+      toggle(id = "gseaTxt")
+      toggle(id = "minSize")
+      toggle(id = "setThresh")
+    })
+    
     observeEvent(input$run, {
       updateNavbarPage(session, "master",
                        selected = "QC Results"
@@ -18,23 +34,24 @@ shinyServer(
       nanostringData <- processNanostringData(input$expr$datapath,
                                               bgType = "t.test", bgPVal = input$bgP,
                                               housekeeping = hk.genes,
-                                              includeQC = TRUE)
+                                              includeQC = FALSE)
       
       nanostringDataBG <- processNanostringData(input$expr$datapath,
                                                 bgType = "threshold", bgThreshold = 2, bgProportion = 0.5,
                                                 housekeeping = hk.genes,
-                                                includeQC = TRUE)
+                                                includeQC = TRUE,
+                                                output.format = "list")
       
-      colnames(nanostringData$exprs) <- 
-        colnames(nanostringData$exprs.raw) <-
-        names(nanostringData$pc.scalefactors) <-
-        names(nanostringData$hk.scalefactors) <-
-        colnames(nanostringData$qc) <- 
+      colnames(nanostringData) <- 
+        colnames(nanostringDataBG$exprs.raw) <-
+        names(nanostringDataBG$pc.scalefactors) <-
+        names(nanostringDataBG$hk.scalefactors) <-
+        rownames(nanostringDataBG$qc) <- 
         rownames(nanostringDataBG$bg.stats) <-
-        gsub(".*\\/|\\.RCC", "", colnames(nanostringData$exprs))
+        gsub(".*\\/|\\.RCC", "", colnames(nanostringData))
       
       if (is.null(input$phen$datapath)) {
-        groups <- gsub("_.*", "", colnames(nanostringData$exprs))
+        groups <- gsub("_.*", "", colnames(nanostringData))
       } else {
         groups <- as.character(read.table(file = input$phen$datapath, sep = "", as.is = TRUE))
       }
@@ -53,8 +70,8 @@ shinyServer(
                  base.group = base.group)
       
       if (!is.null(input$gsDb$datapath)) {
-        ns$gsRes <- mHG.genesets.multi(limmaResults, input$gsDb$datapath,
-                                       t_thresh = input$setThresh, numReq_inSet = input$minSize, numReq_overall = 10)
+        ns$gsRes <- limmaToFGSEA(limmaResults, input$gsDb$datapath,
+                                       min.set = input$minSize)
       }
       
       return(ns)
@@ -101,22 +118,22 @@ shinyServer(
     })
 
       leadingEdge <- reactive({
-      mHG.to.LEdge.multi(ns()$gsRes, ns()$deRes,
+        fgseaToLEdge(ns()$gsRes, ns()$deRes,
                          t.thresh = 2, q.thresh = input$gsQthresh, input$gsDb$datapath)
-    })
+      })
 
       groupedGenesets <- reactive({    
-        groupByDistance(ns()$gsRes[[input$gsComp]][[as.numeric(input$gsDir)]],
+        groupFGSEA(ns()$gsRes[[input$gsComp]][[as.numeric(input$gsDir)]],
                         leadingEdge()[[input$gsComp]][[as.numeric(input$gsDir)]],
                         join.threshold = (1-input$gsJac))
-    })
+      })
 
     output$gsTab <- renderDT({
       datatable(groupedGenesets(),
                 rownames = FALSE,
                 options = list(autoWidth = TRUE,
                                columnDefs = list(list(width = '200px', targets = "_all")))) %>%
-        formatStyle('best', target = 'row',
+        formatStyle('Cluster.Max', target = 'row',
                     color = styleEqual(c("", "x"), c('grey', 'black')),
                     fontSize = '12px')
     }, rownames = FALSE
