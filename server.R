@@ -6,7 +6,6 @@ shinyServer(
     hide(id = "bgP")
     hide(id = "gseaTxt")
     hide(id = "minSize")
-    hide(id = "setThresh")
     
     observeEvent(input$adv, {
       toggle(id = "normTxt")
@@ -14,7 +13,6 @@ shinyServer(
       toggle(id = "bgP")
       toggle(id = "gseaTxt")
       toggle(id = "minSize")
-      toggle(id = "setThresh")
     })
     
     observeEvent(input$run, {
@@ -65,7 +63,7 @@ shinyServer(
       limmaResults <- runLimmaAnalysis(nanostringData, groups, base.group)
       
       ns <- list(dat = nanostringData,
-                 bg.stats = nanostringDataBG$bg.stats,
+                 dat.list = nanostringDataBG,
                  deRes = limmaResults,
                  base.group = base.group)
       
@@ -77,21 +75,22 @@ shinyServer(
       return(ns)
     })
     
-    posQC <- reactive({ positiveQC(ns()) })
-    negQC <- reactive({ negativeQC(ns()) })
-    hkQC <- reactive({ housekeepingQC(ns()) })
+    posQC <- reactive({ positiveQC(ns()$dat.list) })
+    negQC <- reactive({ negativeQC(ns()$dat.list) })
+    hkQC <- reactive({ housekeepingQC(ns()$dat.list) })
     pcaPlot <- reactive({ plotPCA(ns()) })
     deResults <- reactive({ deRes(ns()) })
     
     output$posTab <- renderTable({posQC()$tab})
     output$posPlot <- renderPlot({posQC()$plt})
-    output$negTab <- renderTable({negQC()$tab})
+    output$negTab <- renderTable({negQC()$tab}, rownames = TRUE)
     output$negPlot <- renderPlotly({negQC()$plt})
     output$hkTab <- renderTable({hkQC()$tab})
     output$hkPlot1 <- renderPlotly({hkQC()$plt1})
     output$hkPlot2 <- renderPlotly({hkQC()$plt2})
     output$pcaPlot <- renderPlotly({pcaPlot()})
-    output$deCounts <- renderTable({deResults()$summary})
+    output$deCounts <- renderTable({deResults()$summary},
+                                   rownames = TRUE, round = 0)
     output$deTab <- renderDT({deResults()$de}, rownames = TRUE)
     
     
@@ -103,9 +102,7 @@ shinyServer(
                              choices = names(ns()$gsRes)),
       #    ),
       #    column(12,
-                 radioButtons("gsDir", label = "Direction:",
-                              choices = c("Higher in Group" = 1,
-                                          "Higher in Base" = 2), selected = 1),
+
                  sliderInput("gsJac", label = "Clustering Threshold (Jaccard Index):",
                              min = 0, max = 1, value = 0.5, step = 0.05),
       #    ),
@@ -118,18 +115,20 @@ shinyServer(
     })
 
       leadingEdge <- reactive({
-        fgseaToLEdge(ns()$gsRes, ns()$deRes,
-                         t.thresh = 2, q.thresh = input$gsQthresh, input$gsDb$datapath)
+        fgseaToLEdge(ns()$gsRes, 
+                     cutoff.type = "padj",
+                     cutoff = input$gsQthresh)
       })
 
       groupedGenesets <- reactive({    
-        groupFGSEA(ns()$gsRes[[input$gsComp]][[as.numeric(input$gsDir)]],
-                        leadingEdge()[[input$gsComp]][[as.numeric(input$gsDir)]],
-                        join.threshold = (1-input$gsJac))
+        groupFGSEA(ns()$gsRes[[input$gsComp]],
+                   leadingEdge()[[input$gsComp]],
+                   join.threshold = (1-input$gsJac),
+                   returns = "signif")
       })
 
     output$gsTab <- renderDT({
-      datatable(groupedGenesets(),
+      datatable(groupedGenesets()[,1:9],
                 rownames = FALSE,
                 options = list(autoWidth = TRUE,
                                columnDefs = list(list(width = '200px', targets = "_all")))) %>%

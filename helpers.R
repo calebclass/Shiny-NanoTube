@@ -10,7 +10,7 @@ housekeepingQC <- function(ns) {
     geom_boxplot(data=boxplot.df[boxplot.df$CodeClass == "Endogenous",], 
                  aes(x=variable, y=value), fill="grey70") + 
     theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
-    ggtitle("Pre-Normalization Data") +
+    ggtitle("Raw Data") +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
   
   ggplotly(b1) %>% 
@@ -27,7 +27,7 @@ housekeepingQC <- function(ns) {
   b2 <- ggplot() +
     geom_boxplot(data=boxplot.df, aes(x=X2, y=value), fill="grey70") + 
     theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
-    ggtitle("Normalized Data")
+    ggtitle("Normalized Data") +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
   
   ggplotly(b2) %>% 
@@ -75,7 +75,9 @@ plotPCA <- function(ns) {
 deRes <- function(ns) {
   diffExpr.tab <- rbind(colSums(ns$deRes$q.value < 0.05 & ns$deRes$coefficients > 0),
                         colSums(ns$deRes$q.value < 0.05 & ns$deRes$coefficients < 0))
-  diffExpr.tab <- as.data.frame(diffExpr.tab[,!(colnames(diffExpr.tab) %in% c("Intercept", "(Intercept)"))])
+  diffExpr.tab <- sapply(as.data.frame(diffExpr.tab[,!(colnames(diffExpr.tab) %in% c("Intercept", "(Intercept)"))]),
+                         as, "integer")
+  
   
   if (ncol(diffExpr.tab) == 1) {
     colnames(diffExpr.tab) <- ""

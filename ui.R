@@ -84,7 +84,7 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                               
                               textInput("hk",
                                         label = "Housekeeping Genes",
-                                        value = "ALAS1, ABCF1, TBP, PPIA, TUBB"),
+                                        value = ""),
                               bsTooltip("hk",
                                         "Optional: A list of housekeeping genes present in the input data, separated by commas. If not provided, housekeeping genes will be identified as marked in the input file."),
                               
@@ -105,14 +105,7 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                            max = 500),
                               bsTooltip("minSize",
                                         "Minimum size of gene sets for inclusion in pathway analysis (only genes included in NanoString data are counted)."),
-                              
-                              numericInput("setThresh",
-                                           label = "t threshold",
-                                           value = 2,
-                                           min = 0,
-                                           max = 20),
-                              bsTooltip("setThresh",
-                                        "Minimum t-statistic for mHG significance cutoff (see Help).")
+                            
                               
                             )),
                    
