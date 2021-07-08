@@ -134,7 +134,7 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
   
 
     subClust <- rownames(groupedGenesets)[groupedGenesets$Cluster == gsClust]
-    annot_row <- leadingEdge[[gsComp]][[as.numeric(gsDir)]]
+    annot_row <- leadingEdge[[gsComp]]
     annot_row <- annot_row[,subClust]
     
     if (length(subClust) > 1) {

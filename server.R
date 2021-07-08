@@ -139,7 +139,7 @@ shinyServer(
     )
     
     output$gsHM <- renderPlotly({
-      plotlyHeatmap(ns(), groupedGenesets(), leadingEdge(), input$gsClust, input$gsComp, input$gsDir)
+      plotlyHeatmap(ns(), groupedGenesets()[,1:9], leadingEdge(), input$gsClust, input$gsComp, input$gsDir)
     })
 
     
