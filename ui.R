@@ -7,7 +7,9 @@ library(ggplot2)
 library(DT)
 library(NanoTube)
 source("helpers.R")
-
+##Add gradient scroll 
+##Add sticky header on scroll
+#Add something interactive where person can see the files after they are uploaded
 shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                   
              navbarPage(div(img(src="NanoTube-Logo.png", 
@@ -25,25 +27,37 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                         id = "master",
                    
                         useShinyjs(),
-                        
-                   #tags$head(
-                   #   tags$link(rel = "stylesheet", type = "text/css", href = "styling.css")
-                   #),
-                   #tags$style(type="text/css", "body {padding-top: 70px;}"),
+        
+                    ##CSS here    
+                   tags$head(
+                     tags$link(rel = "stylesheet", type = "text/css", href = "styling.css")
+                   ),
+                   tags$style(type="text/css", "body {padding-top: 70px;}"),
                    
                    tabPanel("Job Setup",
                               
                             fluidPage(
+                          
                               h2("Data Entry"),
                               
-                              fileInput("expr",
-                                        label = "NanoString data",
-                                        multiple = FALSE),
-                              bsTooltip("expr",
-                                        "Either a folder containing .RCC files, or an expression matrix in a .csv or .txt file.",
-                                        placement = "bottom", trigger = "hover", options = NULL),
-                              
                               fluidRow(
+                                ######################
+                                column(12,
+                                       fileInput("expr",
+                                                 label = "NanoString data",
+                                                 multiple = FALSE),
+                                       bsTooltip("expr",
+                                                 "Either a folder containing .RCC files, or an expression matrix in a .csv or .txt file.",
+                                                 placement = "bottom", trigger = "hover", options = NULL)
+                                ),
+                                column(12,
+                                       tableOutput('nanoTable')
+                                )
+                              
+                
+                                ######################
+                              ),
+                                fluidRow(
                                 column(4,
                                        fileInput("phen",
                                                  label = "Sample group classifiers",
@@ -51,13 +65,14 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                        bsTooltip("phen",
                                                  "This file should contain a group classifier for each sample, in the same order as in the expression dataset. If not provided, groups will be interpreted from sample file names (see Help).",
                                                  placement = "bottom", trigger = "hover", options = NULL)
+                                       )
                                 ),
-                                
+                                fluidRow(
                                 column(4,
                                        textInput("basePhen",
                                                  label = "Base group",
                                                  value = ""),
-                                       bsTooltip("basePhen",
+                                       bsTooltip("basePhen", 
                                                  "The group against which other groups will be compared, or the denominator of your Fold Change (such as the Control group). If empty, the first group will be used.",
                                                  placement = "bottom", trigger = "hover", options = NULL)
                                 )
@@ -185,8 +200,42 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                             )
                    ),
                    
+  
                    tabPanel("Help!",
                             fluidPage(
+                              #Job Set up
+                              titlePanel("HELP"),
+                              actionLink("setup", "Job Setup"),
+                              br(),br(),
+                              
+                              actionLink("qcResults", "QC Results"),
+                              br(),br(),
+                              
+                              actionLink("anaResults", "Analysis Results"),
+                              
+                              #####
+                              h2("Job Setup", id = "jobSetup1"),
+                              tags$b("NanoString Data", id = "jobSetup2"),
+                              tags$h5("When entering Nano String data, the data must be in a zip file. Drag and drop the zip file from your directory to the input box.", id ="nanoStringData"),
+                              
+                              tags$b("Sample Group Classifiers", id = "jobSetup3"),
+                              tags$h5("When entering the sample group classifier data, this must be in the form of a  .txt file. ", id ="sampleGroupClassifiers"),
+                              
+                              tags$b("Gene Set Database", id = "jobSetup4"),
+                              tags$h5("This is how to use Gene Set ", id ="geneSetData"),
+                          
+                              #######
+                              h2("QC Results", id = "qResults1"),
+                             
+                              ########
+                              h2("Analysis Results", id = "aResults1"),
+                           
+                              
+                              
+                            
+                              
+                          
+  
 
                             )
                             
