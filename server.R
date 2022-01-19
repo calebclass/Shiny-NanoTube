@@ -107,9 +107,7 @@ shinyServer(
                                    rownames = TRUE, round = 0)
     output$deTab <- renderDT({deResults()$de}, rownames = TRUE)
     ###
-    ##Volcano Plot should be appearing... but it is not.
     output$canoPlot <- renderPlotly({canoPlot()})
-    #output$canoPlot <- renderPlot({canoPlot()$plt1})
     ###
     output$gsUI <- renderUI({
       #inputPanel(
@@ -124,7 +122,7 @@ shinyServer(
                     min = 0, max = 1, value = 0.5, step = 0.05),
         #    ),
         #    column(12,
-        numericInput("gsQthresh", label = "q-value threshold:", value = 0.05, step = 0.05),
+        numericInput("gsQthresh", label = "q-value threshold (must be between minumum q and 1):", value = 0.05, step = 0.05),
         numericInput("gsClust", label = "Cluster to plot:", value = 1, step = 1)
         #    )
       )
@@ -144,7 +142,14 @@ shinyServer(
                  returns = "signif")
     })
     
+    
+    
+    
+    ##########
     output$gsTab <- renderDT({
+      #### q value threshold must be less than 1
+      #### q value must be greater than or equal to the lowest value in the column
+      #### Be able to print a minimum q
       datatable(groupedGenesets()[,1:9],
                 rownames = FALSE,
                 options = list(autoWidth = TRUE,
@@ -158,6 +163,12 @@ shinyServer(
     output$gsHM <- renderPlotly({
       plotlyHeatmap(ns(), groupedGenesets()[,1:9], leadingEdge(), input$gsClust, input$gsComp, input$gsDir)
     })
+    ############
+    
+    
+    
+    
+    
     
     hide(id="jobSetup1")
     hide(id="jobSetup2")
