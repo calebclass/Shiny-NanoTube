@@ -6,6 +6,8 @@ library(plotly)
 library(ggplot2)
 library(DT)
 library(NanoTube)
+library(qusage)
+
 source("helpers.R")
 ##Add gradient scroll 
 ##Add sticky header on scroll
@@ -169,6 +171,16 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                 )
                                        ),
                                        
+                                       #####
+                                       tabPanel("Volcano",
+                                                fluidPage(
+                                                  h4("Volcano Plot"),
+                                                  plotlyOutput("canoPlot")
+                                                  #plotOutput("canoPlot")
+                                                )
+                                                
+                                       ),
+                                       #######
                                        tabPanel("Differential Expression",
                                                 fluidPage(
                                                   h4("Differentially expressed genes (q < 0.05)"),
@@ -176,6 +188,8 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                   
                                                   h4("Full Results"),
                                                   DTOutput("deTab")
+                                                  #####
+                                                 
                                                 )
                                        ),
                                        

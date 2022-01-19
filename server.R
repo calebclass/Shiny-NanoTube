@@ -84,6 +84,7 @@ shinyServer(
       }
       
       return(ns)
+
     })
     
     posQC <- reactive({ positiveQC(ns()$dat.list) })
@@ -91,7 +92,9 @@ shinyServer(
     hkQC <- reactive({ housekeepingQC(ns()$dat.list) })
     pcaPlot <- reactive({ plotPCA(ns()) })
     deResults <- reactive({ deRes(ns()) })
-    
+    ####
+    canoPlot <- reactive({deVolcano(ns()$deRes)})
+    ###
     output$posTab <- renderTable({posQC()$tab})
     output$posPlot <- renderPlot({posQC()$plt})
     output$negTab <- renderTable({negQC()$tab}, rownames = TRUE)
@@ -103,8 +106,11 @@ shinyServer(
     output$deCounts <- renderTable({deResults()$summary},
                                    rownames = TRUE, round = 0)
     output$deTab <- renderDT({deResults()$de}, rownames = TRUE)
-    
-    
+    ###
+    ##Volcano Plot should be appearing... but it is not.
+    output$canoPlot <- renderPlotly({canoPlot()})
+    #output$canoPlot <- renderPlot({canoPlot()$plt1})
+    ###
     output$gsUI <- renderUI({
       #inputPanel(
       fluidRow(
