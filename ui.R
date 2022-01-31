@@ -214,54 +214,14 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                  
                                       )
                              ),
-                             
-                             
-                             tabPanel("Help!",
+                             tabPanel("Help",
                                       fluidPage(
-                                        #Job Set up
-                                        titlePanel("HELP"),
-                                        actionLink("setup", "Job Setup"),
-                                        br(),br(),
-                                        
-                                        actionLink("qcResults", "QC Results"),
-                                        br(),br(),
-                                        
-                                        actionLink("anaResults", "Analysis Results"),
-                                        #### Eventually convert these to txt files to make cleaner code
-                                        #####
-                                        h2("Job Setup", id = "jobSetup1"),
-                                        tags$b("NanoString Data", id = "jobSetup2"),
-                                        tags$h5("When entering Nano String data, the data must be in a zip file. Drag and drop the zip file from your directory to the input box.", id ="nanoStringData"),
-                                        
-                                        tags$b("Sample Group Classifiers", id = "jobSetup3"),
-                                        tags$h5("When entering the sample group classifier data, this must be in the form of a  .txt file. ", id ="sampleGroupClassifiers"),
-                                        
-                                        tags$b("Gene Set Database", id = "jobSetup4"),
-                                        tags$h5("This is how to use Gene Set ", id ="geneSetData"),
-                                        tags$h5("The q value that you select must be between the minumum q value and 1"),
-                                        
-                                        #######
-                                        h2("QC Results", id = "qResults1"),
-                                        
-                                        ########
-                                        h2("Analysis Results", id = "aResults1"),
-                                        
-         
+                                        includeCSS("www/styling2.css"),
+                                        includeHTML("www/help.html"),
+                                        includeScript("www/styling2.js"),
                                       )
-                                      
-                             ),
-                             
-                             
-                             tabPanel("HTML help page",
-                                      fluidPage(
-                                        includeHTML("help.html")
-                                      )
-                                      
                                       
                                       ),
-                             
-                             
-                             
                              
                   )
 )
