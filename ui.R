@@ -27,9 +27,9 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                            .navbar {min-height:50px !important;}'))),
                              selected = "Job Setup",
                              id = "master",
-                             
+                             ####
+                             #includeScript(),
                              useShinyjs(),
-                             
                              ##CSS here    
                              tags$head(
                                tags$link(rel = "stylesheet", type = "text/css", href = "styling.css")
@@ -52,9 +52,7 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                            "Either a folder containing .RCC files, or an expression matrix in a .csv or .txt file.",
                                                            placement = "bottom", trigger = "hover", options = NULL)
                                           ),
-                                          column(12,
-                                                 tableOutput('nanoTable')
-                                          )
+                                       
                                           
                                           
                                           ######################
@@ -85,6 +83,7 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                         fileInput("gsDb",
                                                   label = "Gene set database (Optional)",
                                                   multiple = FALSE),
+                                        
                                         bsTooltip("gsDb",
                                                   "A gene set database file, either in .gmt format or an .rds file containing an R-format list of gene sets",
                                                   placement = "bottom", trigger = "hover", options = NULL),
@@ -186,7 +185,9 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                             tableOutput("deCounts"),
                                                             
                                                             h4("Full Results"),
-                                                            DTOutput("deTab")
+                                                            DTOutput("deTab"),
+                                                            
+                                                            downloadButton("DEdownload","Download Table")
                                                             #####
                                                             
                                                           )
@@ -195,6 +196,9 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                  tabPanel("Nanostring data table",
                                                           fluidPage(
                                                             h4("datatable"),
+                                                            tableOutput('nanoTable'),
+                                                            downloadButton("NANOdownload","Download Table"),
+                                                            
                                                           )),
                                                  #####https://shiny.rstudio.com/reference/shiny/1.2.0/showTab.html
                                                  #conditionalPanel(

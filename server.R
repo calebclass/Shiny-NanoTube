@@ -47,7 +47,7 @@ shinyServer(
       if(file.extension %in% c(".zip",".ZIP")){
         file_input <- unzip(file_input)
         file_input <-read_merge_rcc(file_input)
-        
+        nanoTableData <- file_input
         output$nanoTable <- renderTable(file_input)
       }
       
@@ -93,7 +93,9 @@ shinyServer(
     pcaPlot <- reactive({ plotPCA(ns()) })
     deResults <- reactive({ deRes(ns()) })
     ####
-    canoPlot <- reactive({deVolcano(ns()$deRes)})
+    canoPlot <- reactive({deVolcano(ns()$deRes) +geom_hline(yintercept = 2, linetype = "dashed", colour = "darkred") +
+        geom_vline(xintercept = 0.5, linetype = "dashed", colour = "darkred") +
+        geom_vline(xintercept = -0.5, linetype = "dashed", colour = "darkred")})
     ###
     
     #####
@@ -109,15 +111,31 @@ shinyServer(
     output$deCounts <- renderTable({deResults()$summary},
                                    rownames = TRUE, round = 0)
     output$deTab <- renderDT({deResults()$de}, rownames = TRUE)
+    
+    ####
+    output$DEdownload <- downloadHandler(
+      filename = function() {"de.csv"},
+      content = function(file) {
+        write.csv(deResults(), file)
+      }
+    )
+ 
     ###
     output$canoPlot <- renderPlotly({canoPlot()})
     ###
+    output$NANOdownload <- downloadHandler(
+      filename = function() {"nanoTable.csv"},
+      content = function(file) {
+        write.csv(fileInput(), file)
+      }
+    )
     
     
     
     
+   ####
     
-   
+    
    
   
     
