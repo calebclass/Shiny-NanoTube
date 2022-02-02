@@ -5,11 +5,18 @@
     color: yellow;
 }
 
-
-
+h1 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: red;
+}
 
 
 h2 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: red;
+}
+
+h3 {
   font-family: "Montserrat"; Sans-Serif;
   color: red;
 }
@@ -20,6 +27,11 @@ h4 {
 }
 
 h5 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: black;
+}
+
+p {
   font-family: "Montserrat"; Sans-Serif;
   color: black;
 }

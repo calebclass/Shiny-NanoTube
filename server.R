@@ -95,6 +95,9 @@ shinyServer(
     ####
     canoPlot <- reactive({deVolcano(ns()$deRes)})
     ###
+    
+    #####
+
     output$posTab <- renderTable({posQC()$tab})
     output$posPlot <- renderPlot({posQC()$plt})
     output$negTab <- renderTable({negQC()$tab}, rownames = TRUE)
@@ -109,6 +112,15 @@ shinyServer(
     ###
     output$canoPlot <- renderPlotly({canoPlot()})
     ###
+    
+    
+    
+    
+    
+   
+   
+  
+    
     output$gsUI <- renderUI({
       #inputPanel(
       fluidRow(
@@ -142,6 +154,8 @@ shinyServer(
                  returns = "signif")
     })
     
+   
+    
     
     
     
@@ -150,6 +164,7 @@ shinyServer(
       #### q value threshold must be less than 1
       #### q value must be greater than or equal to the lowest value in the column
       #### Be able to print a minimum q
+      
       datatable(groupedGenesets()[,1:9],
                 rownames = FALSE,
                 options = list(autoWidth = TRUE,

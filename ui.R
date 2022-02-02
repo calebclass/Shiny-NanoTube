@@ -162,7 +162,6 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                       
                              ),
                              
-                             
                              tabPanel("Analysis Results",
                                       navbarPage("Analysis", id = "de",
                                                  tabPanel("PCA",
@@ -192,28 +191,45 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                             
                                                           )
                                                  ),
+                                                 ####
+                                                 tabPanel("Nanostring data table",
+                                                          fluidPage(
+                                                            h4("datatable"),
+                                                          )),
                                                  #####https://shiny.rstudio.com/reference/shiny/1.2.0/showTab.html
                                                  #conditionalPanel(
                                                  #  condition = "input.gsDb != null",
-                                                 tabPanel("Gene Set Analysis",
-                                                          fluidPage(
-                                                            
-                                                            #inputPanel(
-                                                          
-                                                            uiOutput("gsUI"),
-                                                            #),
-                                                            DTOutput("gsTab"),
-                                                            
-                                                            plotlyOutput("gsHM")
-                                                          )
-                                                          
-                                                 )
+                                                 
+                            
+                                                 
                                                  
                                                  #)
                                                  
                                                  
                                       )
                              ),
+                             
+                             ####
+                             tabPanel("Gene Set Analysis",
+                                      navbarPage("GSA", id = "gsa",
+                                                 tabPanel("Gene Set Analysis",
+                                                          fluidPage(
+                                                            
+                                                            #inputPanel(
+                                                            
+                                                            uiOutput("gsUI"),
+                                                            #),
+                                                            DTOutput("gsTab"),
+                                                            
+                                                            plotlyOutput("gsHM"),
+                                                            
+                                                            includeHTML("www/gsa.html"),
+                                                          )
+                                                          
+                                                 )
+                                      )
+                             ),
+                             #####
                              tabPanel("Help",
                                       fluidPage(
                                         includeCSS("www/styling2.css"),
