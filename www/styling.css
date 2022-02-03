@@ -1,4 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+
 .navbar-default:hover {
   background-color: #ffffff !important;
     color: yellow;
+}
+
+
+
+h2 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: red;
+}
+
+h4 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: black;
+}
+
+h5 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: black;
 }
