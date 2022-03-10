@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+
+.navbar-default:hover {
+  background-color: #ffffff !important;
+    color: yellow;
+}
+
+h1 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: red;
+}
+
+
+h2 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: red;
+}
+
+h3 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: red;
+}
+
+h4 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: black;
+}
+
+h5 {
+  font-family: "Montserrat"; Sans-Serif;
+  color: black;
+}
+
+p {
+  font-family: "Montserrat"; Sans-Serif;
+  color: black;
+}
+
+.button {
+  background-color: red;
+  border: black;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  width: 200px;
+}
+

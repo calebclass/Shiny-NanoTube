@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="styling2.css">
+</head>
+<body>
+
+
+
+<h1>HELP</h1>
+
+<script src = "styling2.js" defer></script>
+
+<button class = "button", id = "jobSetup", onclick = "function()"> Job Setup</button>
+<div id="btn-group1" hidden>
+  <h2>NanoString data</h2>
+  <p>Your NanoString data should be loaded as a ZIP folder containing one 
+  RCC file per sample, or a CSV or TXT file containing expression data 
+  for all samples.</p>
+  
+  <h2>Sample group classifiers</h2>
+  <p>*Under Construction* This takes a .txt file with sample classifiers (for example, Treated & Control samples). 
+  Classifiers must be in the same sample order as the NanoStrin expression data. 
+  (*Improvements under construction!*) </p>
+  
+  <h2>Base Group</h2>
+  <p>This is the group that all other groups will be compared against (i.e. the 
+  denominator in your Fold Change). For example, if your data contain groups "A", "B", 
+  and "C", and you select "C" as the base group, NanoTube will conduct analyses and 
+  calculate fold changes for A vs. C and B vs. C.</p>
+  
+  <h2>Gene Set Database</h2>
+  <p>Required only for Gene Set Analysis feature. Gene set database (gmt format) can be 
+  loaded here.</p>
+  
+  <h2>Advanced Options</h2>
+  <h3>Housekeeping Genes</h3>
+  <p>NanoTube will automatically identify housekeeping genes for normalization by identifying
+  those marked as "Housekeeping" in the <b>CodeClass</b>, but these can alternatively be manually
+  specified with this option, by inputting a comma-separated list of genes to be used as housekeeping genes.</p>
+  
+  <h3>Negative Control Threshold</h3>
+  <p>The NanoTube app performs a two-sample, one-sided t test for each gene: this test compares the
+  expression of that gene across all samples vs. the expression of all negative control genes
+  across all samples. The p-value of this test is for the null hypothesis that the endogenous gene does
+  not have expression above the negative control genes. In this field, you can specify the signifance
+  level required to keep a gene for analysis; genes with a p-value above this level will be removed, and not
+  included in differential expression or gene set analysis.</p>
+  
+  <h3>Minimum Gene Set Size</h3>
+  <p>In this field, you can set the number of genes required for an individual gene set (from a loaded gmt file)
+  to be included in analysis. For example, if this value is set to 5, only gene sets with at least 5 genes present
+  in your NanoString data set will be included in gene set analysis.</p>
+  
+</div>
+<br>
+
+<button class = "button", id = "QCResults", onclick = "function()">QC Results</button>
+<div id="btn-group2" hidden>
+  <h2>Positive Controls</h2>
+  <p>The NanoTube web app identifies positive control, negative control, and housekeeping genes prior to analysis,
+  mainly based on each gene's <b>CodeClass</b>.  Positive control normalization is performed by scaling all genes by 
+  the <b>Scale Factor</b> for each sample, calculated using the geometric mean of the positive control genes. 
+  Scale factors outside of the range 0.3-3 indicate high variance between samples and potential problems in the 
+  data, and these should be checked before proceeding.</p>
+  
+  <p>A scatter plot of Observed vs. Expected expression of positive control genes is also provided
+  for each sample, with the <b>R-squared</b> values provided in the table. "Expected" expression is
+  identified from the positive control gene names.  For example, the gene POS_I(8) has an expected expression
+  of 8 (or expected log2 expression of 2). Low R-squared values potentially indicate issues in detection of
+  the positive control genes.</p>
+  
+  <h2>Negative Controls</h2>
+  <p></p>
+
+  
+  <h2>Reading housekeeping:</h2>
+  <p>This is how you housekeep</p>
+</div>
+<br>
+
+<button class = "button", id = "analyzeResults", onclick = "function()">Analyze Results</button>
+<div id="btn-group3" hidden>
+  
+  <h2>Reading PCA anaylsis</h2>
+  <p>This is how you PCA analysis</p>
+  
+  <h2>Reading a volcano plot</h2>
+  <p>Log2 of Fold Change (Expression of A/Expression of B). A positive number means higher expression of A. A negative number means higher expression of B. The magnitude tells the importance of the expression.  </p>
+  <p>Fold Change = Expression of A/Expression of B</p>
+  
+  <h2>Reading differential expression</h2>
+  
+  <h2>Reading gene set analysis</h2>
+  
+</div>
+<br>
+
+
+
+
+<button class = "button", id = "geneSetAnalysis", onclick = "function()">Gene Set Analysis</button>
+<div id="btn-group4" hidden>
+  
+  <h2>Reading gene set analysis</h2>
+  <p>Clustering Threshold:</p>
+  <p>Q value: For now, you must change around the value. Working on finding the minimum Q value automatically.</p>
+  <p>Jacquard index: This is the proportion of the intersection of group 1 and 2 over the union of group 1 and 2</p>
+  
+</div>
+<br>
+
+
+
+
+
+
+
+
+
+</body>
+</html>
