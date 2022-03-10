@@ -1,12 +1,8 @@
+library(NanoTube)
 library(shinyBS)
 library(shinyjs)
-library(Biobase)
-library(limma)
 library(plotly)
-library(ggplot2)
 library(DT)
-library(NanoTube)
-library(qusage)
 
 source("helpers.R")
 ##Add gradient scroll 
