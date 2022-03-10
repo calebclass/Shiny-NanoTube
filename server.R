@@ -1,5 +1,6 @@
 shinyServer(
   function(input, output, session) {
+    options(shiny.maxRequestSize=100*1024^2)
     
     hide(id = "normTxt")
     hide(id = "hk")
