@@ -1,0 +1,7 @@
+﻿name,title,geo_accession,data_row_count,age,disease state,gender,histology,individual,outcome
+GSM3897343_PPC-WORSE-01,PPC-WORSE-01,GSM3897343,784,61,pancreatic cancer,F,adenocarcinoma,Patient 1,worse prognosis
+GSM3897344_PPC-WORSE-04,PPC-WORSE-04,GSM3897344,784,69,pancreatic cancer,M,adenocarcinoma,Patient 2,worse prognosis
+GSM3897345_PPC-WORSE-06,PPC-WORSE-06,GSM3897345,784,76,pancreatic cancer,M,adenocarcinoma,Patient 3,worse prognosis
+GSM3897346_PPC-GOOD-07,PPC-GOOD-07,GSM3897346,784,65,pancreatic cancer,M,adenocarcinoma,Patient 4,good prognosis
+GSM3897347_PPC-GOOD-11,PPC-GOOD-11,GSM3897347,784,58,pancreatic cancer,M,adenocarcinoma,Patient 5,good prognosis
+GSM3897348_PPC-GOOD-12,PPC-GOOD-12,GSM3897348,784,68,pancreatic cancer,F,adenocarcinoma,Patient 6,good prognosis
