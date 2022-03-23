@@ -8,7 +8,7 @@ library(DT)
 library(NanoTube)
 source("helpers.R")
 
-shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
+shinyUI(fluidPage(id="formatting",
                   
              navbarPage(div(img(src="NanoTube-Logo.png", 
                                 style="float:right", height = 40, width = 110), ""),
