@@ -9,8 +9,9 @@ if (!require("BiocManager", quietly = TRUE))
 
 BiocManager::install("NanoTube")
 ```
-3. Install other required libraries
+3. Install other required and recommended libraries.
 ```{r}
 install.packages(c("shinyBS", "shinyjs", "plotly", "DT"))
+BiocManager::install("qusage")
 ```
 4. Open 'ui.R' in Shiny-NanoTube, and click 'Run'!
