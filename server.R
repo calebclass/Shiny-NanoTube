@@ -153,7 +153,7 @@ shinyServer(
                     min = 0, max = 1, value = 0.5, step = 0.05),
         #    ),
         #    column(12,
-        numericInput("gsQthresh", label = "q-value threshold (must be between minumum q and 1):", value = 0.05, step = 0.05),
+        numericInput("gsQthresh", label = "q-value threshold (must be between minumum q and 1):", value = 1, step = 0.05),
         numericInput("gsClust", label = "Cluster to plot:", value = 1, step = 1)
         #    )
       )

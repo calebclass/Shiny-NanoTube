@@ -8,7 +8,7 @@ source("helpers.R")
 ##Add gradient scroll 
 ##Add sticky header on scroll
 #Add something interactive where person can see the files after they are uploaded
-shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
+shinyUI(fluidPage(id="formatting",
                   
                   navbarPage(div(img(src="NanoTube-Logo.png", 
                                      style="float:right", height = 40, width = 110), ""),
@@ -21,7 +21,7 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                             font-size: 15px;
                             }
                            .navbar {min-height:50px !important;}'))),
-                             selected = "Job Setup",
+                             selected = "Welcome",
                              id = "master",
                              ####
                              #includeScript(),
@@ -31,6 +31,19 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                tags$link(rel = "stylesheet", type = "text/css", href = "styling.css")
                              ),
                              tags$style(type="text/css", "body {padding-top: 70px;}"),
+                             
+                             tabPanel("Welcome",
+                                      fluidPage(
+                                        h1("Welcome to the NanoTube!"),
+                                        
+                                        
+                                        includeCSS("www/styling2.css"),
+                                        includeHTML("www/landing.html"),
+                                        includeScript("www/styling2.js")
+                                        
+                                       # img(src="www/cophs_horiz_4cp_1-4w.jpg", align = "left")
+                                      )
+                                      ),
                              
                              tabPanel("Job Setup",
                                       
