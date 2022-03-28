@@ -16,6 +16,26 @@ shinyServer(
       toggle(id = "minSize")
     })
     
+    sample_info <- reactive({
+      req(input$phen)
+      read.csv(input$phen$datapath, header = TRUE,
+               sep = ",")
+    })
+    
+    output$phenCol_input <- renderUI({
+      req(sample_info())
+      selectInput(inputId = "phenCol",
+                  label = "Group Column",
+                  choices = colnames(sample_info()))
+    })
+    
+    output$basePhen_input <- renderUI({
+      req(sample_info(), input$phenCol)
+      selectInput(inputId = "basePhen",
+                  label = "Base Group",
+                  choices = unique(sample_info()[,input$phenCol]))
+    })
+    
     observeEvent(input$run, {
       updateNavbarPage(session, "master",
                        selected = "QC Results"
@@ -31,6 +51,8 @@ shinyServer(
       }
       
       nanostringData <- processNanostringData(input$expr$datapath,
+                                              sampleTab = input$phen$datapath,
+                                              groupCol = input$phenCol,
                                               bgType = "t.test", bgPVal = input$bgP,
                                               housekeeping = hk.genes,
                                               includeQC = FALSE)
@@ -42,15 +64,15 @@ shinyServer(
                                                 output.format = "list")
       
       
-      file_input <- input$expr$datapath
-      file.extension <- substr(file_input[1], 
-                               (nchar(file_input[1])-3), nchar(file_input[1]))
-      if(file.extension %in% c(".zip",".ZIP")){
-        file_input <- unzip(file_input)
-        file_input <-read_merge_rcc(file_input)
-        nanoTableData <- file_input
-        output$nanoTable <- renderTable(file_input)
-      }
+#      file_input <- input$expr$datapath
+#      file.extension <- substr(file_input[1], 
+#                               (nchar(file_input[1])-3), nchar(file_input[1]))
+#      if(file.extension %in% c(".zip",".ZIP")){
+#        file_input <- unzip(file_input)
+#        file_input <-read_merge_rcc(file_input)
+#        nanoTableData <- file_input
+#        output$nanoTable <- renderTable(file_input)
+#      }
       
       colnames(nanostringData) <- 
         colnames(nanostringDataBG$exprs.raw) <-
@@ -60,19 +82,19 @@ shinyServer(
         rownames(nanostringDataBG$bg.stats) <-
         gsub(".*\\/|\\.RCC", "", colnames(nanostringData))
       
-      if (is.null(input$phen$datapath)) {
-        groups <- gsub("_.*", "", colnames(nanostringData))
-      } else {
-        groups <- as.character(read.table(file = input$phen$datapath, sep = "", as.is = TRUE))
-      }
+#      if (is.null(input$phen$datapath)) {
+#        groups <- gsub("_.*", "", colnames(nanostringData))
+#      } else {
+#        groups <- as.character(read.table(file = input$phen$datapath, sep = "", as.is = TRUE))
+#      }
       
-      if (input$basePhen == "") {
-        base.group <- groups[1]
-      } else {
+#      if (input$basePhen == "") {
+#        base.group <- groups[1]
+#      } else {
         base.group <- input$basePhen
-      }
+#      }
       
-      limmaResults <- runLimmaAnalysis(nanostringData, groups, base.group)
+      limmaResults <- runLimmaAnalysis(nanostringData, NULL, base.group)
       
       ns <- list(dat = nanostringData,
                  dat.list = nanostringDataBG,

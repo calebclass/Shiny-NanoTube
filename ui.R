@@ -76,15 +76,15 @@ shinyUI(fluidPage(id="formatting",
                                                            placement = "bottom", trigger = "hover", options = NULL)
                                           )
                                         ),
+                                        
                                         fluidRow(
                                           column(4,
-                                                 textInput("basePhen",
-                                                           label = "Base group",
-                                                           value = ""),
-                                                 bsTooltip("basePhen", 
-                                                           "The group against which other groups will be compared, or the denominator of your Fold Change (such as the Control group). If empty, the first group will be used.",
-                                                           placement = "bottom", trigger = "hover", options = NULL)
-                                          )
+                                                 uiOutput("phenCol_input"))
+                                        ),
+                                        
+                                        fluidRow(
+                                          column(4,
+                                                 uiOutput("basePhen_input"))
                                           
                                           
                                         ),
