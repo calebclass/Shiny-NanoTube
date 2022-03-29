@@ -60,7 +60,7 @@ shinyUI(fluidPage(id="formatting",
                                                  bsTooltip("expr",
                                                            "Either a folder containing .RCC files, or an expression matrix in a .csv or .txt file.",
                                                            placement = "bottom", trigger = "hover", options = NULL)
-                                          ),
+                                          )
                                        
                                           
                                           
@@ -74,7 +74,9 @@ shinyUI(fluidPage(id="formatting",
                                                  bsTooltip("phen",
                                                            "This file should contain a group classifier for each sample, in the same order as in the expression dataset. If not provided, groups will be interpreted from sample file names (see Help).",
                                                            placement = "bottom", trigger = "hover", options = NULL)
-                                          )
+                                          ),
+                                          column(12,
+                                                 DTOutput("merged_info"))
                                         ),
                                         
                                         fluidRow(
@@ -96,6 +98,9 @@ shinyUI(fluidPage(id="formatting",
                                         bsTooltip("gsDb",
                                                   "A gene set database file, either in .gmt format or an .rds file containing an R-format list of gene sets",
                                                   placement = "bottom", trigger = "hover", options = NULL),
+                                        
+                                        actionButton("check",
+                                                     label = "Check Data"),
                                         
                                         actionButton("run",
                                                      label = "Analyze Data"),

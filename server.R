@@ -36,6 +36,24 @@ shinyServer(
                   choices = unique(sample_info()[,input$phenCol]))
     })
     
+    merged_info <- eventReactive(input$check, {
+      req(input$expr, input$phen)
+      nanostringData <- processNanostringData(input$expr$datapath,
+                                              sampleTab = input$phen$datapath,
+                                              groupCol = input$phenCol,
+                                              normalization = "none",
+                                              includeQC = FALSE,
+                                              output.format = "list")
+    })
+    
+    output$merged_info <- renderDT({
+      req(merged_info())
+      
+      checkTable <- cbind(data.frame(Filename = colnames(merged_info()$exprs), 
+                                     Group = merged_info()$groups),
+                          merged_info()$samples)
+    }, rownames = FALSE)
+    
     observeEvent(input$run, {
       updateNavbarPage(session, "master",
                        selected = "QC Results"
