@@ -173,7 +173,11 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                  tabPanel("Volcano",
                                                           fluidPage(
                                                             h4("Volcano Plot"),
-                                                            plotlyOutput("canoPlot")
+                                                            ####
+                                                            numericInput('volcanoVertLineInput','log2(FC)', value = 0, min = 0, max = 4),
+                                                            numericInput('volcanoHorLineInput','-log10(p)', value = 0, min = 0, max = 4),
+                                                          
+                                                            plotlyOutput("canoPlot"),
                                                             #plotOutput("canoPlot")
                                                           )
                                                           
@@ -196,14 +200,16 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                  tabPanel("Nanostring data table",
                                                           fluidPage(
                                                             h4("datatable"),
-                                                            tableOutput('nanoTable'),
                                                             downloadButton("NANOdownload","Download Table"),
+                                                            tableOutput('nanoTable'),
+                                                            
                                                             
                                                           )),
                                                  #####https://shiny.rstudio.com/reference/shiny/1.2.0/showTab.html
                                                  #conditionalPanel(
                                                  #  condition = "input.gsDb != null",
                                                  
+                                               
                             
                                                  
                                                  
@@ -223,11 +229,16 @@ shinyUI(fluidPage(id="formatting", theme = shinythemes::shinytheme("simplex"),
                                                             
                                                             uiOutput("gsUI"),
                                                             #),
+                                                            ###uiOutput(gsUI1)
+                                                            ###Add another UI output and split up the index/q val threshold
+                                                            ###Add a note for the minimum 
                                                             DTOutput("gsTab"),
                                                             
                                                             plotlyOutput("gsHM"),
                                                             
                                                             includeHTML("www/gsa.html"),
+                                                            
+                                                            textOutput('qvalue'),
                                                           )
                                                           
                                                  )

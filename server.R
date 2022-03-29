@@ -7,12 +7,15 @@ shinyServer(
     hide(id = "gseaTxt")
     hide(id = "minSize")
     
+    ###
+ 
     observeEvent(input$adv, {
       toggle(id = "normTxt")
       toggle(id = "hk")
       toggle(id = "bgP")
       toggle(id = "gseaTxt")
       toggle(id = "minSize")
+     
     })
     
     observeEvent(input$run, {
@@ -20,7 +23,9 @@ shinyServer(
                        selected = "QC Results"
       )
     })
-    
+    ####
+ 
+    #####
     ns <- eventReactive(input$run, {
       
       if (input$hk == "") {
@@ -87,15 +92,60 @@ shinyServer(
 
     })
     
+  
+    
+  
     posQC <- reactive({ positiveQC(ns()$dat.list) })
     negQC <- reactive({ negativeQC(ns()$dat.list) })
     hkQC <- reactive({ housekeepingQC(ns()$dat.list) })
     pcaPlot <- reactive({ plotPCA(ns()) })
     deResults <- reactive({ deRes(ns()) })
-    ####
-    canoPlot <- reactive({deVolcano(ns()$deRes) +geom_hline(yintercept = 2, linetype = "dashed", colour = "darkred") +
-        geom_vline(xintercept = 0.5, linetype = "dashed", colour = "darkred") +
-        geom_vline(xintercept = -0.5, linetype = "dashed", colour = "darkred")})
+    
+    
+    ####################################
+    ############
+    deVolcano1 <- function(limmaResults, 
+                          plotContrast = NULL, y.var = c("p.value", "q.value")) {
+      
+      # Bind local variables
+      log2FC <- log10p <- NULL
+      
+      # Identify contrast if not provided
+      if (is.null(plotContrast)) {
+        plotContrast <-
+          colnames(limmaResults$coefficients)[
+            which(!(colnames(limmaResults) %in% 
+                      c("Intercept", "(Intercept)")))[1]]
+        
+        cat("\n'plotContrast' not provided, setting it to", plotContrast, "\n")
+      }
+      
+      # Set up data frame for plot
+      df <- data.frame(log2FC = limmaResults$coefficients[,plotContrast],
+                       log10p = -log10(limmaResults[[y.var[1]]][,plotContrast]),
+                       name = limmaResults$genes$Name)
+      
+  
+        plt <- ggplot(df, aes(x = log2FC, y = log10p, label = name)) +
+          geom_point() +
+          xlab("log2(Fold Change)") +
+          ylab(paste0("-log10(", substr(y.var[1], 1, 1), ")")) +
+          theme_bw()
+      
+      
+      
+      return(plt)
+      
+    }
+    
+    
+    
+    ############
+    ##############################
+    canoPlot <- reactive({deVolcano1(limmaResults = ns()$deRes) +
+        geom_hline(yintercept =  input$volcanoHorLineInput, linetype =  "dashed", colour = 'darkred') +
+        geom_vline(xintercept = input$volcanoVertLineInput, linetype = "dashed", colour = "darkred") +
+        geom_vline(xintercept = -input$volcanoVertLineInput, linetype = "dashed", colour = "darkred")})
     ###
     
     #####
@@ -143,6 +193,8 @@ shinyServer(
       #inputPanel(
       fluidRow(
         #      column(12,
+        #Picking the comparison you want to look at
+        #Can choose all of the different comparisons that you have
         selectInput("gsComp", label = "Comparison:",
                     choices = names(ns()$gsRes)),
         #    ),
@@ -152,7 +204,7 @@ shinyServer(
                     min = 0, max = 1, value = 0.5, step = 0.05),
         #    ),
         #    column(12,
-        numericInput("gsQthresh", label = "q-value threshold (must be between minumum q and 1):", value = 0.05, step = 0.05),
+        numericInput("gsQthresh", label = "q-value threshold (must be between minumum q and 1):", value = 1, step = 0.05),
         numericInput("gsClust", label = "Cluster to plot:", value = 1, step = 1)
         #    )
       )
@@ -172,8 +224,15 @@ shinyServer(
                  returns = "signif")
     })
     
-   
+   #### ns()$gsRes within input$gsComp = number of groups - 1
+    ### find minimum of first line of min(ns()$gsRes[[input$gsComp]]$padj)
     
+    
+    output$qvalue <- renderPrint({
+ 
+      print(min(ns()$gsRes[[input$gsComp]]$padj))
+      
+    })
     
     
     
