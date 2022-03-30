@@ -135,7 +135,8 @@ shinyServer(
     deResults <- reactive({ deRes(ns()) })
     ####
     
-    canoPlot <- reactive({deVolcanoInt(limmaResults = ns()$deRes) +
+    canoPlot <- reactive({deVolcanoInt(limmaResults = ns()$deRes,
+                                       plotContrast = input$volComp) +
         geom_hline(yintercept =  -log10(input$volcanoHorLineInput), linetype =  "dashed", colour = 'darkred') +
         geom_vline(xintercept = input$volcanoVertLineInput, linetype = "dashed", colour = "darkred") +
         geom_vline(xintercept = -input$volcanoVertLineInput, linetype = "dashed", colour = "darkred")})
@@ -180,6 +181,13 @@ shinyServer(
    ####
     
     
+    output$volUI <- renderUI({
+      fluidRow(
+        selectInput("volComp", label = "Comparison (vs. Base Group):",
+                    choices = colnames(ns()$deRes)[!(colnames(ns()$deRes) %in% 
+                                                      c("Intercept", "(Intercept)"))])
+      )
+    })
    
   
     
@@ -187,7 +195,7 @@ shinyServer(
       #inputPanel(
       fluidRow(
         #      column(12,
-        selectInput("gsComp", label = "Comparison:",
+        selectInput("gsComp", label = "Comparison (vs. Base Group):",
                     choices = names(ns()$gsRes)),
         #    ),
         #    column(12,
