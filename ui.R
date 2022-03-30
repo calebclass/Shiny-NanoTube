@@ -187,8 +187,11 @@ shinyUI(fluidPage(id="formatting",
                                                  tabPanel("Volcano",
                                                           fluidPage(
                                                             h4("Volcano Plot"),
+                                                            
+                                                            numericInput('volcanoVertLineInput','log2(FC) cutoff', value = 0, min = 0, max = 4),
+                                                            numericInput('volcanoHorLineInput','p-val cutoff', value = 0.05, min = 0, max = 1),
+                                                            
                                                             plotlyOutput("canoPlot")
-                                                            #plotOutput("canoPlot")
                                                           )
                                                           
                                                  ),

@@ -187,3 +187,38 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
     }
     
 }
+
+
+deVolcanoInt <- function(limmaResults, 
+                       plotContrast = NULL, y.var = c("p.value", "q.value")) {
+  
+  # Bind local variables
+  log2FC <- log10p <- NULL
+  
+  # Identify contrast if not provided
+  if (is.null(plotContrast)) {
+    plotContrast <-
+      colnames(limmaResults$coefficients)[
+        which(!(colnames(limmaResults) %in% 
+                  c("Intercept", "(Intercept)")))[1]]
+    
+    cat("\n'plotContrast' not provided, setting it to", plotContrast, "\n")
+  }
+  
+  # Set up data frame for plot
+  df <- data.frame(log2FC = limmaResults$coefficients[,plotContrast],
+                   log10p = -log10(limmaResults[[y.var[1]]][,plotContrast]),
+                   name = limmaResults$genes$Name)
+  
+  
+  plt <- ggplot(df, aes(x = log2FC, y = log10p, label = name)) +
+    geom_point() +
+    xlab("log2(Fold Change)") +
+    ylab(paste0("-log10(", substr(y.var[1], 1, 1), ")")) +
+    theme_bw()
+  
+  
+  
+  return(plt)
+  
+}
