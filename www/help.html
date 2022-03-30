@@ -18,10 +18,18 @@
   RCC file per sample, or a CSV or TXT file containing expression data 
   for all samples.</p>
   
-  <h2>Sample group classifiers</h2>
-  <p>*Under Construction* This takes a .txt file with sample classifiers (for example, Treated & Control samples). 
-  Classifiers must be in the same sample order as the NanoStrin expression data. 
-  (*Improvements under construction!*) </p>
+  <h2>Sample info table</h2>
+  <p>This takes a CSV file containing sample information.  This Shiny app conducts
+  group-vs.-group comparisons, so one column must include the group identifier for each sample (for example, Treated or Control). 
+  Sample names should be in the first column. If the RCC filenames are used as sample
+  names, they will be merged so that they match.  Otherwise, the RCC files and sample
+  table will be merged in order. The merge can be checked prior to analysis using "Check Samples", to make
+  sure they match.</p>
+  
+  <h2>Group Column</h2>
+  <p>After loading the sample info table, a dropdown box will appear, containing the columns
+  from that table. Select the column containing the group information for differential
+  expression analysis.</p>
   
   <h2>Base Group</h2>
   <p>This is the group that all other groups will be compared against (i.e. the 

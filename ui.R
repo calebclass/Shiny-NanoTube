@@ -69,10 +69,10 @@ shinyUI(fluidPage(id="formatting",
                                         fluidRow(
                                           column(4,
                                                  fileInput("phen",
-                                                           label = "Sample group classifiers",
+                                                           label = "Sample info table",
                                                            multiple = FALSE),
                                                  bsTooltip("phen",
-                                                           "This file should contain a group classifier for each sample, in the same order as in the expression dataset. If not provided, groups will be interpreted from sample file names (see Help).",
+                                                           "This should be a CSV file, containing sample information.",
                                                            placement = "bottom", trigger = "hover", options = NULL)
                                           ),
                                           column(12,
@@ -100,7 +100,7 @@ shinyUI(fluidPage(id="formatting",
                                                   placement = "bottom", trigger = "hover", options = NULL),
                                         
                                         actionButton("check",
-                                                     label = "Check Data"),
+                                                     label = "Check Samples"),
                                         
                                         actionButton("run",
                                                      label = "Analyze Data"),
