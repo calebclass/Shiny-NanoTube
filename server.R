@@ -46,13 +46,23 @@ shinyServer(
                                               output.format = "list")
     })
     
-    output$merged_info <- renderDT({
+    output$merged_info <- renderDataTable({
       req(merged_info())
       
-      checkTable <- cbind(data.frame(Filename = colnames(merged_info()$exprs), 
+      checkTable <- datatable(cbind(data.frame(Filename = colnames(merged_info()$exprs), 
                                      Group = merged_info()$groups),
-                          merged_info()$samples)
-    }, rownames = FALSE)
+                          merged_info()$samples),
+                          rownames = FALSE,
+                          options = list(
+                            autoWidth = TRUE, scrollX = TRUE,
+                            columnDefs = list(list(
+                              width = "125px", targets = "_all"
+                            )),
+                            dom = 'tpB',
+                            lengthMenu = list(c(5, 15,-1), c('5', '15', 'All')),
+                            pageLength = 10
+                          ))  # thanks to https://stackoverflow.com/questions/57946206/how-to-resize-a-datatable-in-order-to-fit-it-in-a-box-for-shinydashboard
+    })
     
     observeEvent(input$run, {
       updateNavbarPage(session, "master",

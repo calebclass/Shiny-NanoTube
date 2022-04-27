@@ -42,7 +42,8 @@ dashboardPage(skin = "blue",
                                       ),
                              
                              tabItem(tabName = "setup",
-                                      
+                                      box(
+                                        
                                       fluidPage(
                                         
                                         h2("Data Entry"),
@@ -63,16 +64,15 @@ dashboardPage(skin = "blue",
                                           ######################
                                         ),
                                         fluidRow(
-                                          column(4,
+                                          column(12,
                                                  fileInput("phen",
                                                            label = "Sample info table",
                                                            multiple = FALSE),
                                                  bsTooltip("phen",
                                                            "This should be a CSV file, containing sample information.",
                                                            placement = "bottom", trigger = "hover", options = NULL)
-                                          ),
-                                          column(12,
-                                                 DTOutput("merged_info"))
+                                          )
+                                                 
                                         ),
                                         
                                         fluidRow(
@@ -134,6 +134,11 @@ dashboardPage(skin = "blue",
                                         
                                         
                                       )),
+                                     
+                                     box(
+                                       DTOutput("merged_info")
+                                     )
+                                      ),
                              
                              tabItem(tabName = "QCres",
                                       navbarPage("QC", id = "qc",
