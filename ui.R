@@ -1,4 +1,6 @@
 library(NanoTube)
+library(shiny)
+library(shinydashboard)
 library(shinyBS)
 library(shinyjs)
 library(plotly)
@@ -8,31 +10,25 @@ source("helpers.R")
 ##Add gradient scroll 
 ##Add sticky header on scroll
 #Add something interactive where person can see the files after they are uploaded
-shinyUI(fluidPage(id="formatting",
-                  
-                  navbarPage(div(img(src="NanoTube-Logo.png", 
-                                     style="float:right", height = 40, width = 110), ""),
-                             tags$head(
-                               tags$style(HTML('.navbar-nav > li > a, .navbar-brand {
-                            padding-top:4px !important; 
-                            padding-bottom:4px !important;
-                            line-height: 40px !important;
-                            height: 40px;
-                            font-size: 15px;
-                            }
-                           .navbar {min-height:50px !important;}'))),
-                             selected = "Welcome",
-                             id = "master",
-                             ####
-                             #includeScript(),
-                             useShinyjs(),
-                             ##CSS here    
-                             tags$head(
-                               tags$link(rel = "stylesheet", type = "text/css", href = "styling.css")
-                             ),
-                             tags$style(type="text/css", "body {padding-top: 70px;}"),
+dashboardPage(skin = "blue",
+              
+              header,    
+              #dashboardHeader(title = "NanoTube"),
+              dashboardSidebar(
+                sidebarMenu(
+                  menuItem("Welcome", tabName = "Welcome", icon = icon("flag")),
+                  menuItem("Job Setup", tabName = "setup", icon = icon("th")),
+                  menuItem("QC Results", tabName = "QCres", icon = icon("chart-line")),
+                  menuItem("Analysis Results", tabName = "AnalysisRes", icon = icon("chart-bar")),
+                  menuItem("Gene Set Analysis", tabName = "GSA", icon = icon("chart-bar")),
+                  menuItem("Help", tabName = "Help", icon = icon("question-circle"))
+                )
+              ),
+              
+              dashboardBody(
+                tabItems(
                              
-                             tabPanel("Welcome",
+                             tabItem(tabName = "Welcome",
                                       fluidPage(
                                         h1("Welcome to the NanoTube!"),
                                         
@@ -45,7 +41,7 @@ shinyUI(fluidPage(id="formatting",
                                       )
                                       ),
                              
-                             tabPanel("Job Setup",
+                             tabItem(tabName = "setup",
                                       
                                       fluidPage(
                                         
@@ -134,12 +130,12 @@ shinyUI(fluidPage(id="formatting",
                                                      min = 0,
                                                      max = 500),
                                         bsTooltip("minSize",
-                                                  "Minimum size of gene sets for inclusion in pathway analysis (only genes included in NanoString data are counted)."),
+                                                  "Minimum size of gene sets for inclusion in pathway analysis (only genes included in NanoString data are counted).")
                                         
                                         
                                       )),
                              
-                             tabPanel("QC Results",
+                             tabItem(tabName = "QCres",
                                       navbarPage("QC", id = "qc",
                                                  tabPanel("Positive Controls",
                                                           fluidPage(
@@ -175,7 +171,7 @@ shinyUI(fluidPage(id="formatting",
                                       
                              ),
                              
-                             tabPanel("Analysis Results",
+                             tabItem(tabName = "AnalysisRes",
                                       navbarPage("Analysis", id = "de",
                                                  tabPanel("PCA",
                                                           fluidPage(
@@ -215,9 +211,9 @@ shinyUI(fluidPage(id="formatting",
                                                           fluidPage(
                                                             h4("datatable"),
                                                             tableOutput('nanoTable'),
-                                                            downloadButton("NANOdownload","Download Table"),
+                                                            downloadButton("NANOdownload","Download Table")
                                                             
-                                                          )),
+                                                          ))
                                                  #####https://shiny.rstudio.com/reference/shiny/1.2.0/showTab.html
                                                  #conditionalPanel(
                                                  #  condition = "input.gsDb != null",
@@ -232,7 +228,7 @@ shinyUI(fluidPage(id="formatting",
                              ),
                              
                              ####
-                             tabPanel("Gene Set Analysis",
+                             tabItem(tabName = "GSA",
                                       navbarPage("GSA", id = "gsa",
                                                  tabPanel("Gene Set Analysis",
                                                           fluidPage(
@@ -245,23 +241,24 @@ shinyUI(fluidPage(id="formatting",
                                                             
                                                             plotlyOutput("gsHM"),
                                                             
-                                                            includeHTML("www/gsa.html"),
+                                                            includeHTML("www/gsa.html")
                                                           )
                                                           
                                                  )
                                       )
                              ),
                              #####
-                             tabPanel("Help",
+                             tabItem("Help",
                                       fluidPage(
                                         includeCSS("www/styling2.css"),
                                         includeHTML("www/help.html"),
-                                        includeScript("www/styling2.js"),
+                                        includeScript("www/styling2.js")
                                       )
                                       
-                                      ),
+                                      )
                              
                   )
 )
-
 )
+
+

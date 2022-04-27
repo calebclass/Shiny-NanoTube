@@ -1,3 +1,14 @@
+# Add logo to dashboard header:
+header <- dashboardHeader()
+anchor <- tags$a(href='',
+                 tags$img(src='NanoTube-LogoBlue2.jpg', height='50', width='144'))
+
+header$children[[2]]$children <- tags$div(
+#yuck:  tags$head(tags$style(HTML(".name { background-color: black }"))),
+  anchor,
+  class = 'name')
+
+
 housekeepingQC <- function(ns) {
   hk.tab <- data.frame(Sample = names(ns$hk.scalefactors),
                        `Scale Factor` = round(ns$hk.scalefactors, 2))
