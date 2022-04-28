@@ -64,11 +64,11 @@ shinyServer(
                           ))  # thanks to https://stackoverflow.com/questions/57946206/how-to-resize-a-datatable-in-order-to-fit-it-in-a-box-for-shinydashboard
     })
     
-    observeEvent(input$run, {
-      updateNavbarPage(session, "master",
-                       selected = "QC Results"
-      )
-    })
+#    observeEvent(input$run, {
+#      updateNavbarPage(session, "master",
+#                       selected = "QC Results"
+#      )
+#    })
     
     ns <- eventReactive(input$run, {
       
@@ -155,8 +155,8 @@ shinyServer(
     
     #####
 
-    output$posTab <- renderTable({posQC()$tab})
-    output$posPlot <- renderPlot({posQC()$plt})
+    output$posTab <- renderDataTable({datatable(posQC()$tab, rownames = FALSE)})
+    output$posPlot <- renderPlotly({ggplotly(posQC()$plt)})
     output$negTab <- renderTable({negQC()$tab}, rownames = TRUE)
     output$negPlot <- renderPlotly({negQC()$plt})
     output$hkTab <- renderTable({hkQC()$tab})

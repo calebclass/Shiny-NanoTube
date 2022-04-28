@@ -136,7 +136,7 @@ dashboardPage(skin = "blue",
                                       )),
                                      
                                      box(
-                                       DTOutput("merged_info")
+                                       dataTableOutput("merged_info")
                                      )
                                       ),
                              
@@ -146,11 +146,11 @@ dashboardPage(skin = "blue",
                                                           fluidPage(
                                                             fluidRow(
                                                               column(8,
-                                                                     plotOutput("posPlot", width = "100%")
+                                                                     plotlyOutput("posPlot", width = "100%")
                                                               ),
                                                               
                                                               column(4,
-                                                                     tableOutput("posTab")
+                                                                     dataTableOutput("posTab")
                                                               )))),
                                                  
                                                  tabPanel("Negative Controls",
