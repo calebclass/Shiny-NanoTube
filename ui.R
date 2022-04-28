@@ -143,15 +143,15 @@ dashboardPage(skin = "blue",
                              tabItem(tabName = "QCres",
                                       navbarPage("QC", id = "qc",
                                                  tabPanel("Positive Controls",
-                                                          fluidPage(
-                                                            fluidRow(
-                                                              column(8,
-                                                                     plotlyOutput("posPlot", width = "100%")
+                                                          box(
+                                                            column(width = 12, plotlyOutput("posPlot", width = "100%", height = "auto")),
+                                                                     width = 8
                                                               ),
                                                               
-                                                              column(4,
-                                                                     dataTableOutput("posTab")
-                                                              )))),
+                                                          box(
+                                                                     dataTableOutput("posTab"),
+                                                                     width = 4
+                                                              )),
                                                  
                                                  tabPanel("Negative Controls",
                                                           fluidPage(

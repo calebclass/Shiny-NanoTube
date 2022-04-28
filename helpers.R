@@ -233,3 +233,15 @@ deVolcanoInt <- function(limmaResults,
   return(plt)
   
 }
+
+prepPosOutputs <- function(posQC) {
+  posQC$plotly <- ggplotly(posQC$plt,
+                           height = nrow(posQC$tab)*90) 
+  
+  posQC$DT <- posQC$tab
+  posQC$DT$Scale.Factor <- signif(posQC$DT$Scale.Factor, digits = 3)
+  posQC$DT$R.squared <- signif(posQC$DT$R.squared, digits = 3)
+  posQC$DT <- datatable(posQC$DT, rownames = FALSE)
+  
+  return(posQC)
+}
