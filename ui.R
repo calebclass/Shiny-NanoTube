@@ -12,8 +12,8 @@ source("helpers.R")
 #Add something interactive where person can see the files after they are uploaded
 dashboardPage(skin = "blue",
               
-              header,    
-              #dashboardHeader(title = "NanoTube"),
+              header,  # defined in 'helpers.R'
+              
               dashboardSidebar(
                 sidebarMenu(
                   menuItem("Welcome", tabName = "Welcome", icon = icon("flag")),
@@ -48,40 +48,40 @@ dashboardPage(skin = "blue",
                                         
                                         h2("Data Entry"),
                                         
-                                        fluidRow(
-                                          ######################
-                                          column(12,
-                                                 fileInput("expr",
-                                                           label = "NanoString data",
-                                                           multiple = FALSE),
-                                                 bsTooltip("expr",
-                                                           "Either a folder containing .RCC files, or an expression matrix in a .csv or .txt file.",
-                                                           placement = "bottom", trigger = "hover", options = NULL)
-                                          )
-                                       
-                                          
-                                          
-                                          ######################
-                                        ),
-                                        fluidRow(
-                                          column(12,
-                                                 fileInput("phen",
-                                                           label = "Sample info table",
-                                                           multiple = FALSE),
-                                                 bsTooltip("phen",
-                                                           "This should be a CSV file, containing sample information.",
-                                                           placement = "bottom", trigger = "hover", options = NULL)
-                                          )
-                                                 
-                                        ),
                                         
+                                        ######################
+                                        
+                                        fileInput("expr",
+                                                  label = "NanoString data",
+                                                  multiple = FALSE),
+                                        bsTooltip("expr",
+                                                  "Either a folder containing .RCC files, or an expression matrix in a .csv or .txt file.",
+                                                  placement = "bottom", trigger = "hover", options = NULL),
+                                        
+                                        
+                                        
+                                        
+                                        ######################
+                                        
+                                        
+                                        fileInput("phen",
+                                                  label = "Sample info table",
+                                                  multiple = FALSE),
+                                        bsTooltip("phen",
+                                                  "This should be a CSV file, containing sample information.",
+                                                  placement = "bottom", trigger = "hover", options = NULL),
+                                        
+                                        
+                                        
+                                        # Read columns in Sample info table, asks user which column corresponds to "Group"
                                         fluidRow(
-                                          column(4,
+                                          column(6,
                                                  uiOutput("phenCol_input"))
                                         ),
                                         
+                                        # Of the groups in the "Group" column, which one is the group against which all others will be compared (the control group, for example)
                                         fluidRow(
-                                          column(4,
+                                          column(6,
                                                  uiOutput("basePhen_input"))
                                           
                                           
