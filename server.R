@@ -139,7 +139,7 @@ shinyServer(
     })
     
     posQC <- reactive({ prepPosOutputs(positiveQC(ns()$dat.list)) })
-    negQC <- reactive({ negativeQC(ns()$dat.list) })
+    negQC <- reactive({ negativeQC(ns()$dat.list, interactive.plot = FALSE) })
     hkQC <- reactive({ housekeepingQC(ns()$dat.list) })
     pcaPlot <- reactive({ plotPCA(ns()) })
     deResults <- reactive({ deRes(ns()) })
@@ -157,8 +157,12 @@ shinyServer(
 
     output$posTab <- renderDataTable({ posQC()$DT })
     output$posPlot <- renderPlotly({ posQC()$plotly })
-    output$negTab <- renderTable({negQC()$tab}, rownames = TRUE)
-    output$negPlot <- renderPlotly({negQC()$plt})
+    output$negTab <- renderDataTable({datatable(negQC()$tab, rownames = TRUE,
+                                                options = list(
+                                                  columnDefs = list(list(className = 'dt-center', targets = 0:5))
+                                                ))})
+    output$negPlot <- renderPlotly({ggplotly(negQC()$plt,
+                                             height = 80 + nrow(negQC()$tab) * 15 )})
     output$hkTab <- renderTable({hkQC()$tab})
     output$hkPlot1 <- renderPlotly({hkQC()$plt1})
     output$hkPlot2 <- renderPlotly({hkQC()$plt2})

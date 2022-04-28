@@ -154,10 +154,17 @@ dashboardPage(skin = "blue",
                                                               )),
                                                  
                                                  tabPanel("Negative Controls",
-                                                          fluidPage(
-                                                            tableOutput("negTab"),
-                                                            
-                                                            plotlyOutput("negPlot")
+                                                          fluidRow(
+                                                            box(
+                                                              dataTableOutput("negTab"), width = 8
+                                                              )
+                                                          ),
+                                                          
+                                                          fluidRow(
+                                                            box(
+                                                              column(width = 12, plotlyOutput("negPlot", width = "100%", height = "auto")), 
+                                                              width = 8
+                                                            )
                                                           )),
                                                  
                                                  tabPanel("Housekeeping",
