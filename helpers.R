@@ -4,10 +4,10 @@ anchor <- tags$a(href='',
                  tags$img(src='NanoTube-LogoBlue2.jpg', height='50', width='144'))
 
 header$children[[2]]$children <- tags$div(
-#yuck:  tags$head(tags$style(HTML(".name { background-color: black }"))),
   anchor,
   class = 'name')
 
+######################
 
 housekeepingQC <- function(ns) {
   hk.tab <- data.frame(Sample = names(ns$hk.scalefactors),
@@ -22,9 +22,10 @@ housekeepingQC <- function(ns) {
                  aes(x=variable, y=value), fill="grey70") + 
     theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
     ggtitle("Raw Data") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    coord_flip()
   
-  ggplotly(b1) %>% 
+  b1 <- ggplotly(b1, height = 80 + nrow(hk.tab) * 15) %>% 
     layout(margin = list(b=90))
   
   boxplot.dat <- log2(ns$exprs[ns$dict$CodeClass == "Endogenous",]+0.5)
@@ -39,9 +40,10 @@ housekeepingQC <- function(ns) {
     geom_boxplot(data=boxplot.df, aes(x=X2, y=value), fill="grey70") + 
     theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
     ggtitle("Normalized Data") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    coord_flip()
   
-  ggplotly(b2) %>% 
+  b2 <- ggplotly(b2, height = 80 + nrow(hk.tab) * 15) %>% 
     layout(margin = list(b=90))
   
   return(list(tab = hk.tab,

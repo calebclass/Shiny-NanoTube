@@ -163,7 +163,7 @@ shinyServer(
                                                 ))})
     output$negPlot <- renderPlotly({ggplotly(negQC()$plt,
                                              height = 80 + nrow(negQC()$tab) * 15 )})
-    output$hkTab <- renderTable({hkQC()$tab})
+    output$hkTab <- renderDataTable({datatable(hkQC()$tab, rownames = FALSE) })
     output$hkPlot1 <- renderPlotly({hkQC()$plt1})
     output$hkPlot2 <- renderPlotly({hkQC()$plt2})
     output$pcaPlot <- renderPlotly({pcaPlot()})

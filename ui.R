@@ -168,19 +168,17 @@ dashboardPage(skin = "blue",
                                                           )),
                                                  
                                                  tabPanel("Housekeeping",
-                                                          fluidPage(
-                                                            fluidRow(
-                                                              column(8,
-                                                                     plotlyOutput("hkPlot1", width = "100%"),
+                                                          box(
+                                                                     plotlyOutput("hkPlot1", width = "100%", height = "auto"),
                                                                      br(),br(),
-                                                                     plotlyOutput("hkPlot2", width = "100%")
-                                                              ),
-                                                              
-                                                              column(4,
-                                                                     tableOutput("hkTab")
-                                                              ))))
-                                      )
-                                      
+                                                                     plotlyOutput("hkPlot2", width = "100%", height = "auto"),
+                                                                     width = 8
+                                                          ),
+                                                          
+                                                          box(
+                                                                     dataTableOutput("hkTab"),
+                                                                     width = 4
+                                                          )))
                              ),
                              
                              tabItem(tabName = "AnalysisRes",
