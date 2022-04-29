@@ -102,7 +102,10 @@ dashboardPage(skin = "blue",
                                                      label = "Analyze Data"),
                                         #submitButton("Analyze Data"),
                                         
-                                        br(), br(),
+                                        br(),
+                                        verbatimTextOutput("numSamps"),
+                                        
+                                        br(),
                                         
                                         actionLink("adv", "Advanced Options"),
                                         

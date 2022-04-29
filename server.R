@@ -72,71 +72,86 @@ shinyServer(
     
     ns <- eventReactive(input$run, {
       
-      if (input$hk == "") {
-        hk.genes <- NULL
-      } else {
-        hk.genes <- gsub(" ", "", strsplit(input$hk, split=",")[[1]])
-      }
-      
-      nanostringData <- processNanostringData(input$expr$datapath,
-                                              sampleTab = input$phen$datapath,
-                                              groupCol = input$phenCol,
-                                              bgType = "t.test", bgPVal = input$bgP,
-                                              housekeeping = hk.genes,
-                                              includeQC = FALSE)
-      
-      nanostringDataBG <- processNanostringData(input$expr$datapath,
-                                                bgType = "threshold", bgThreshold = 2, bgProportion = 0.5,
+      withProgress(message = "Please wait", value = 0, {
+        
+        if (input$hk == "") {
+          hk.genes <- NULL
+        } else {
+          hk.genes <- gsub(" ", "", strsplit(input$hk, split=",")[[1]])
+        }
+        
+        incProgress(1/4, detail = "Processing Data")
+        
+        nanostringData <- processNanostringData(input$expr$datapath,
+                                                sampleTab = input$phen$datapath,
+                                                groupCol = input$phenCol,
+                                                bgType = "t.test", bgPVal = input$bgP,
                                                 housekeeping = hk.genes,
-                                                includeQC = TRUE,
-                                                output.format = "list")
-      
-      
-#      file_input <- input$expr$datapath
-#      file.extension <- substr(file_input[1], 
-#                               (nchar(file_input[1])-3), nchar(file_input[1]))
-#      if(file.extension %in% c(".zip",".ZIP")){
-#        file_input <- unzip(file_input)
-#        file_input <-read_merge_rcc(file_input)
-#        nanoTableData <- file_input
-#        output$nanoTable <- renderTable(file_input)
-#      }
-      
-      colnames(nanostringData) <- 
-        colnames(nanostringDataBG$exprs.raw) <-
-        names(nanostringDataBG$pc.scalefactors) <-
-        names(nanostringDataBG$hk.scalefactors) <-
-        rownames(nanostringDataBG$qc) <- 
-        rownames(nanostringDataBG$bg.stats) <-
-        gsub(".*\\/|\\.RCC", "", colnames(nanostringData))
-      
-#      if (is.null(input$phen$datapath)) {
-#        groups <- gsub("_.*", "", colnames(nanostringData))
-#      } else {
-#        groups <- as.character(read.table(file = input$phen$datapath, sep = "", as.is = TRUE))
-#      }
-      
-#      if (input$basePhen == "") {
-#        base.group <- groups[1]
-#      } else {
+                                                includeQC = FALSE)
+        
+        incProgress(1/4, detail = "Normalizing Data")
+        
+        nanostringDataBG <- processNanostringData(input$expr$datapath,
+                                                  bgType = "threshold", bgThreshold = 2, bgProportion = 0.5,
+                                                  housekeeping = hk.genes,
+                                                  includeQC = TRUE,
+                                                  output.format = "list")
+        
+        
+        #      file_input <- input$expr$datapath
+        #      file.extension <- substr(file_input[1], 
+        #                               (nchar(file_input[1])-3), nchar(file_input[1]))
+        #      if(file.extension %in% c(".zip",".ZIP")){
+        #        file_input <- unzip(file_input)
+        #        file_input <-read_merge_rcc(file_input)
+        #        nanoTableData <- file_input
+        #        output$nanoTable <- renderTable(file_input)
+        #      }
+        
+        colnames(nanostringData) <- 
+          colnames(nanostringDataBG$exprs.raw) <-
+          names(nanostringDataBG$pc.scalefactors) <-
+          names(nanostringDataBG$hk.scalefactors) <-
+          rownames(nanostringDataBG$qc) <- 
+          rownames(nanostringDataBG$bg.stats) <-
+          gsub(".*\\/|\\.RCC", "", colnames(nanostringData))
+        
+        #      if (is.null(input$phen$datapath)) {
+        #        groups <- gsub("_.*", "", colnames(nanostringData))
+        #      } else {
+        #        groups <- as.character(read.table(file = input$phen$datapath, sep = "", as.is = TRUE))
+        #      }
+        
+        #      if (input$basePhen == "") {
+        #        base.group <- groups[1]
+        #      } else {
         base.group <- input$basePhen
-#      }
-      
-      limmaResults <- runLimmaAnalysis(nanostringData, NULL, base.group)
-      
-      ns <- list(dat = nanostringData,
-                 dat.list = nanostringDataBG,
-                 deRes = limmaResults,
-                 base.group = base.group)
-      
-      if (!is.null(input$gsDb$datapath)) {
-        ns$gsRes <- limmaToFGSEA(limmaResults, input$gsDb$datapath,
-                                 min.set = input$minSize)
-      }
-      
-      return(ns)
-
+        #      }
+        
+        incProgress(1/4, detail = "Analyzing Diff. Expr.")
+        
+        limmaResults <- runLimmaAnalysis(nanostringData, NULL, base.group)
+        
+        ns <- list(dat = nanostringData,
+                   dat.list = nanostringDataBG,
+                   deRes = limmaResults,
+                   base.group = base.group)
+        
+        if (!is.null(input$gsDb$datapath)) {
+          incProgress(1/6, detail = "Analyzing Gene Sets")
+          ns$gsRes <- limmaToFGSEA(limmaResults, input$gsDb$datapath,
+                                   min.set = input$minSize)
+        }
+        
+        return(ns)
+        
+      })
     })
+    
+    output$numSamps <- renderText({ 
+      req(ns())
+      paste0("All done! Analyzed ", ncol(ns()$dat), " samples.\nUse the other tabs to view results.") 
+      })
     
     posQC <- reactive({ prepPosOutputs(positiveQC(ns()$dat.list)) })
     negQC <- reactive({ negativeQC(ns()$dat.list, interactive.plot = FALSE) })
@@ -162,7 +177,7 @@ shinyServer(
                                                   columnDefs = list(list(className = 'dt-center', targets = 0:5))
                                                 ))})
     output$negPlot <- renderPlotly({ggplotly(negQC()$plt,
-                                             height = 80 + nrow(negQC()$tab) * 15 )})
+                                             height = 120 + nrow(negQC()$tab) * 15 )})
     output$hkTab <- renderDataTable({datatable(hkQC()$tab, rownames = FALSE) })
     output$hkPlot1 <- renderPlotly({hkQC()$plt1})
     output$hkPlot2 <- renderPlotly({hkQC()$plt2})

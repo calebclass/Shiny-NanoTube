@@ -17,16 +17,14 @@ housekeepingQC <- function(ns) {
   boxplot.dat$CodeClass <- ns$dict.raw$CodeClass
   boxplot.df <- reshape::melt(boxplot.dat, "CodeClass")
   
-  b1 <- ggplot() +
+  bg1 <- ggplot() +
     geom_boxplot(data=boxplot.df[boxplot.df$CodeClass == "Endogenous",], 
                  aes(x=variable, y=value), fill="grey70") + 
     theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
     ggtitle("Raw Data") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     coord_flip()
   
-  b1 <- ggplotly(b1, height = 80 + nrow(hk.tab) * 15) %>% 
-    layout(margin = list(b=90))
+  b1 <- ggplotly(bg1, height = 150 + nrow(hk.tab) * 15)
   
   boxplot.dat <- log2(ns$exprs[ns$dict$CodeClass == "Endogenous",]+0.5)
   boxplot.df <- reshape::melt(boxplot.dat)
@@ -36,15 +34,13 @@ housekeepingQC <- function(ns) {
 #                        dat = c(ns$pc.scalefactors,
 #                                hk.scaleFactor = ns$hk.scalefactors))
   
-  b2 <- ggplot() +
+  bg2 <- ggplot() +
     geom_boxplot(data=boxplot.df, aes(x=X2, y=value), fill="grey70") + 
     theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
     ggtitle("Normalized Data") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     coord_flip()
   
-  b2 <- ggplotly(b2, height = 80 + nrow(hk.tab) * 15) %>% 
-    layout(margin = list(b=90))
+  b2 <- ggplotly(bg2, height = 150 + nrow(hk.tab) * 15)
   
   return(list(tab = hk.tab,
               plt1 = b1,
