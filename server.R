@@ -2,20 +2,6 @@ shinyServer(
   function(input, output, session) {
     options(shiny.maxRequestSize=100*1024^2)
     
-    hide(id = "normTxt")
-    hide(id = "hk")
-    hide(id = "bgP")
-    hide(id = "gseaTxt")
-    hide(id = "minSize")
-    
-    observeEvent(input$adv, {
-      toggle(id = "normTxt")
-      toggle(id = "hk")
-      toggle(id = "bgP")
-      toggle(id = "gseaTxt")
-      toggle(id = "minSize")
-    })
-    
     sample_info <- reactive({
       req(input$phen)
       read.csv(input$phen$datapath, header = TRUE,
@@ -157,7 +143,7 @@ shinyServer(
     negQC <- reactive({ negativeQC(ns()$dat.list, interactive.plot = FALSE) })
     hkQC <- reactive({ housekeepingQC(ns()$dat.list) })
     pcaPlot <- reactive({ plotPCA(ns()) })
-    deResults <- reactive({ deRes(ns()) })
+    deResults <- reactive({ deRes(ns(), input$summaryQ) })
     ####
     
     canoPlot <- reactive({deVolcanoInt(limmaResults = ns()$deRes,
@@ -181,10 +167,16 @@ shinyServer(
     output$hkTab <- renderDataTable({datatable(hkQC()$tab, rownames = FALSE) })
     output$hkPlot1 <- renderPlotly({hkQC()$plt1})
     output$hkPlot2 <- renderPlotly({hkQC()$plt2})
-    output$pcaPlot <- renderPlotly({pcaPlot()})
-    output$deCounts <- renderTable({deResults()$summary},
-                                   rownames = TRUE, round = 0)
-    output$deTab <- renderDT({deResults()$de}, rownames = TRUE)
+    output$pcaPlot <- renderPlotly({
+      req(ns())
+      pcaPlot()})
+    output$deCounts <- renderTable({
+      req(ns())
+      deResults()$summary},
+      rownames = TRUE, round = 0)
+    output$deTab <- renderDT({req(ns())
+      deResults()$de}, 
+      rownames = TRUE)
     
     ####
     output$DEdownload <- downloadHandler(
@@ -193,9 +185,10 @@ shinyServer(
         write.csv(deResults(), file)
       }
     )
- 
+    
     ###
-    output$canoPlot <- renderPlotly({canoPlot()})
+    output$canoPlot <- renderPlotly({req(ns())
+      canoPlot()})
     ###
     output$NANOdownload <- downloadHandler(
       filename = function() {"nanoTable.csv"},
@@ -211,10 +204,10 @@ shinyServer(
     
     
     output$volUI <- renderUI({
-      fluidRow(
+        req(ns())
         selectInput("volComp", label = "Comparison (vs. Base Group):",
                     choices = colnames(ns()$deRes)[!(colnames(ns()$deRes) %in% 
-                                                      c("Intercept", "(Intercept)"))])
+                                                      c("Intercept", "(Intercept)"))]
       )
     })
    
@@ -222,7 +215,8 @@ shinyServer(
     
     output$gsUI <- renderUI({
       #inputPanel(
-      fluidRow(
+      req(ns()$gsRes)
+      column(width = 10,
         #      column(12,
         selectInput("gsComp", label = "Comparison (vs. Base Group):",
                     choices = names(ns()$gsRes)),
@@ -263,6 +257,7 @@ shinyServer(
       #### q value threshold must be less than 1
       #### q value must be greater than or equal to the lowest value in the column
       #### Be able to print a minimum q
+      req(groupedGenesets())
       
       datatable(groupedGenesets()[,1:9],
                 rownames = FALSE,
@@ -275,6 +270,7 @@ shinyServer(
     )
     
     output$gsHM <- renderPlotly({
+      req(groupedGenesets())
       plotlyHeatmap(ns(), groupedGenesets()[,1:9], leadingEdge(), input$gsClust, input$gsComp, input$gsDir)
     })
     ############

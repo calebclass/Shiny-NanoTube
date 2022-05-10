@@ -81,9 +81,9 @@ plotPCA <- function(ns) {
 }
 
 
-deRes <- function(ns) {
-  diffExpr.tab <- rbind(colSums(ns$deRes$q.value < 0.05 & ns$deRes$coefficients > 0),
-                        colSums(ns$deRes$q.value < 0.05 & ns$deRes$coefficients < 0))
+deRes <- function(ns, summaryQ) {
+  diffExpr.tab <- rbind(colSums(ns$deRes$q.value < summaryQ & ns$deRes$coefficients > 0),
+                        colSums(ns$deRes$q.value < summaryQ & ns$deRes$coefficients < 0))
   diffExpr.tab <- sapply(as.data.frame(diffExpr.tab[,!(colnames(diffExpr.tab) %in% c("Intercept", "(Intercept)"))]),
                          as, "integer")
   
@@ -114,7 +114,12 @@ deRes <- function(ns) {
   brks.qv <- seq(0, 0.1, 0.1/100)
   cols.qv <- paste0("rgb(255,", round(seq(40, 255, length.out = length(brks.qv) + 1), 0), ",255)")
   dtable <- datatable(diffExpr.full, 
-                      options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
+                      options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")),
+                                     autoWidth = TRUE, scrollX = TRUE,
+                                     #columnDefs = list(list(width = "125px", targets = "_all")),
+                                     dom = 'tpB',
+                                     lengthMenu = list(c(5, 15,-1), c('5', '15', 'All')),
+                                     pageLength = 10)) %>%
     formatStyle(names(diffExpr.full)[substr(names(diffExpr.full), 1, 6) == "Log2FC"], 
                 backgroundColor = styleInterval(brks.fc, cols.fc)) %>%
     formatStyle(names(diffExpr.full)[substr(names(diffExpr.full), 1, 5) == "q-val"], 
