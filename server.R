@@ -83,6 +83,16 @@ shinyServer(
                                                   includeQC = TRUE,
                                                   output.format = "list")
         
+        # Need to run this again, just to get Gene statistics vs. Background.
+        # This will be updated in NanoTube R package
+        nanostringDataBG2 <- processNanostringData(input$expr$datapath,
+                                                sampleTab = input$phen$datapath,
+                                                groupCol = input$phenCol,
+                                                bgType = "t.test", bgPVal = input$bgP,
+                                                housekeeping = hk.genes,
+                                                includeQC = FALSE,
+                                                output.format = "list")
+        
         
         #      file_input <- input$expr$datapath
         #      file.extension <- substr(file_input[1], 
@@ -121,7 +131,8 @@ shinyServer(
         ns <- list(dat = nanostringData,
                    dat.list = nanostringDataBG,
                    deRes = limmaResults,
-                   base.group = base.group)
+                   base.group = base.group,
+                   gene.stats = nanostringDataBG2$gene.stats)
         
         if (!is.null(input$gsDb$datapath)) {
           incProgress(1/6, detail = "Analyzing Gene Sets")
@@ -162,6 +173,9 @@ shinyServer(
                                                 options = list(
                                                   columnDefs = list(list(className = 'dt-center', targets = 0:5))
                                                 ))})
+    output$negGenes <- renderDataTable({prepNegGenes(ns())})
+    output$negSummary <- renderTable ({summarizeNegQC(ns())},
+                                      rownames = FALSE, colnames = FALSE)
     output$negPlot <- renderPlotly({ggplotly(negQC()$plt,
                                              height = 120 + nrow(negQC()$tab) * 15 )})
     output$hkTab <- renderDataTable({datatable(hkQC()$tab, rownames = FALSE) })

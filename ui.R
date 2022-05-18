@@ -27,164 +27,181 @@ dashboardPage(skin = "blue",
               
               dashboardBody(
                 tabItems(
-                             
-                             tabItem(tabName = "Welcome",
-                                      fluidPage(
-                                        h1("Welcome to the NanoTube!"),
-                                        
-                                        
-                                        includeCSS("www/styling2.css"),
-                                        includeHTML("www/landing.html"),
-                                        includeScript("www/styling2.js")
-                                        
-                                       # img(src="www/cophs_horiz_4cp_1-4w.jpg", align = "left")
-                                      )
-                                      ),
-                             
-                             tabItem(tabName = "setup",
-                                     
-                                     fluidRow(
-                                       column(width = 6,
-                                              
-                                              box(title = "Data Entry", width = NULL,
-                                                  
-                                                  fluidPage(
-                                                    
-                                                    fileInput("expr",
-                                                              label = "NanoString data",
-                                                              multiple = FALSE),
-                                                    bsTooltip("expr",
-                                                              "Either a folder containing .RCC files, or an expression matrix in a .csv or .txt file.",
-                                                              placement = "bottom", trigger = "hover", options = NULL),
-
-                                                    ######################
-                                                    
-                                                    fileInput("phen",
-                                                              label = "Sample info table",
-                                                              multiple = FALSE),
-                                                    bsTooltip("phen",
-                                                              "This should be a CSV file, containing sample information.",
-                                                              placement = "bottom", trigger = "hover", options = NULL),
-                                                    
-                                                    
-                                                    
-                                                    # Read columns in Sample info table, asks user which column corresponds to "Group"
-                                                    fluidRow(
-                                                      column(6,
-                                                             uiOutput("phenCol_input"))
-                                                    ),
-                                                    
-                                                    # Of the groups in the "Group" column, which one is the group against which all others will be compared (the control group, for example)
-                                                    fluidRow(
-                                                      column(6,
-                                                             uiOutput("basePhen_input"))
-                                                      
-                                                      
-                                                    ),
-                                                    
-                                                    fileInput("gsDb",
-                                                              label = "Gene set database (Optional)",
-                                                              multiple = FALSE),
-                                                    
-                                                    bsTooltip("gsDb",
-                                                              "A gene set database file, either in .gmt format or an .rds file containing an R-format list of gene sets",
-                                                              placement = "bottom", trigger = "hover", options = NULL),
-                                                    
-                                                    actionButton("check",
-                                                                 label = "Check Samples"),
-                                                    
-                                                    actionButton("run",
-                                                                 label = "Analyze Data"),
-                                                    #submitButton("Analyze Data"),
-                                                    
-                                                    br(),
-                                                    verbatimTextOutput("numSamps"),
-                                                    br()
-                                                    
-                                                  )),
-                                              
-                                              box(title = "Advanced Options", width = NULL, 
-                                                  collapsible = TRUE, collapsed = TRUE,
-                                                  
-                                                  h4("Normalization Options", id = "gseaTxt"),
-                                                  
-                                                  textInput("hk",
-                                                            label = "Housekeeping Genes",
-                                                            value = ""),
-                                                  bsTooltip("hk",
-                                                            "Optional: A list of housekeeping genes present in the input data, separated by commas. If not provided, housekeeping genes will be identified as marked in the input file."),
-                                                  
-                                                  numericInput("bgP",
-                                                               label = "Negative Control Threshold (t test p-value)",
-                                                               value = 0.05,
-                                                               min = 0.00001,
-                                                               max = 2),
-                                                  bsTooltip("bgP",
-                                                            "Expression threshold (vs. negative control genes) for inclusion, in the form of a p-value from a 2-sample t test (see Help). To include all genes in analysis, set to 2."),
-                                                  
-                                                  h4("Gene Set Analysis Options", id = "gseaTxt"),
-                                                  
-                                                  numericInput("minSize",
-                                                               label = "Min size (exclude smaller sets)",
-                                                               value = 5,
-                                                               min = 0,
-                                                               max = 500),
-                                                  bsTooltip("minSize",
-                                                            "Minimum size of gene sets for inclusion in pathway analysis (only genes included in NanoString data are counted).")
-                                                  
-                                                  
-                                              )
-                                       ),
+                  
+                  tabItem(tabName = "Welcome",
+                          fluidPage(
+                            h1("Welcome to the NanoTube!"),
+                            
+                            
+                            includeCSS("www/styling2.css"),
+                            includeHTML("www/landing.html"),
+                            includeScript("www/styling2.js")
+                            
+                            # img(src="www/cophs_horiz_4cp_1-4w.jpg", align = "left")
+                          )
+                  ),
+                  
+                  tabItem(tabName = "setup",
+                          
+                          fluidRow(
+                            column(width = 6,
+                                   
+                                   box(title = "Data Entry", width = NULL,
                                        
-                                       column(width = 6,
+                                       fluidPage(
+                                         
+                                         fileInput("expr",
+                                                   label = "NanoString data",
+                                                   multiple = FALSE),
+                                         bsTooltip("expr",
+                                                   "Either a folder containing .RCC files, or an expression matrix in a .csv or .txt file.",
+                                                   placement = "bottom", trigger = "hover", options = NULL),
+                                         
+                                         ######################
+                                         
+                                         fileInput("phen",
+                                                   label = "Sample info table",
+                                                   multiple = FALSE),
+                                         bsTooltip("phen",
+                                                   "This should be a CSV file, containing sample information.",
+                                                   placement = "bottom", trigger = "hover", options = NULL),
+                                         
+                                         
+                                         
+                                         # Read columns in Sample info table, asks user which column corresponds to "Group"
+                                         fluidRow(
+                                           column(6,
+                                                  uiOutput("phenCol_input"))
+                                         ),
+                                         
+                                         # Of the groups in the "Group" column, which one is the group against which all others will be compared (the control group, for example)
+                                         fluidRow(
+                                           column(6,
+                                                  uiOutput("basePhen_input"))
+                                           
+                                           
+                                         ),
+                                         
+                                         fileInput("gsDb",
+                                                   label = "Gene set database (Optional)",
+                                                   multiple = FALSE),
+                                         
+                                         bsTooltip("gsDb",
+                                                   "A gene set database file, either in .gmt format or an .rds file containing an R-format list of gene sets",
+                                                   placement = "bottom", trigger = "hover", options = NULL),
+                                         
+                                         actionButton("check",
+                                                      label = "Check Samples"),
+                                         
+                                         actionButton("run",
+                                                      label = "Analyze Data"),
+                                         #submitButton("Analyze Data"),
+                                         
+                                         br(),
+                                         verbatimTextOutput("numSamps"),
+                                         br()
+                                         
+                                       )),
+                                   
+                                   box(title = "Advanced Options", width = NULL, 
+                                       collapsible = TRUE, collapsed = TRUE,
+                                       
+                                       h4("Normalization Options", id = "gseaTxt"),
+                                       
+                                       textInput("hk",
+                                                 label = "Housekeeping Genes",
+                                                 value = ""),
+                                       bsTooltip("hk",
+                                                 "Optional: A list of housekeeping genes present in the input data, separated by commas. If not provided, housekeeping genes will be identified as marked in the input file."),
+                                       
+                                       numericInput("bgP",
+                                                    label = "Negative Control Threshold (t test p-value)",
+                                                    value = 0.05,
+                                                    min = 0.00001,
+                                                    max = 2),
+                                       bsTooltip("bgP",
+                                                 "Expression threshold (vs. negative control genes) for inclusion, in the form of a p-value from a 2-sample t test (see Help). To include all genes in analysis, set to 2."),
+                                       
+                                       h4("Gene Set Analysis Options", id = "gseaTxt"),
+                                       
+                                       numericInput("minSize",
+                                                    label = "Min size (exclude smaller sets)",
+                                                    value = 5,
+                                                    min = 0,
+                                                    max = 500),
+                                       bsTooltip("minSize",
+                                                 "Minimum size of gene sets for inclusion in pathway analysis (only genes included in NanoString data are counted).")
+                                       
+                                       
+                                   )
+                            ),
+                            
+                            column(width = 6,
+                                   
+                                   box(width = NULL,
+                                       dataTableOutput("merged_info")
+                                   )
+                            ))
+                  ),
+                  
+                  tabItem(tabName = "QCres",
+                          navbarPage("QC", id = "qc",
+                                     tabPanel("Positive Controls",
+                                              box(
+                                                column(width = 12, plotlyOutput("posPlot", width = "100%", height = "auto")),
+                                                width = 8
+                                              ),
                                               
-                                              box(width = NULL,
-                                                  dataTableOutput("merged_info")
-                                              )
-                                       ))
-                             ),
-                             
-                             tabItem(tabName = "QCres",
-                                      navbarPage("QC", id = "qc",
-                                                 tabPanel("Positive Controls",
-                                                          box(
-                                                            column(width = 12, plotlyOutput("posPlot", width = "100%", height = "auto")),
-                                                                     width = 8
-                                                              ),
-                                                              
-                                                          box(
-                                                                     dataTableOutput("posTab"),
-                                                                     width = 4
-                                                              )),
-                                                 
-                                                 tabPanel("Negative Controls",
-                                                          fluidRow(
-                                                            box(
-                                                              dataTableOutput("negTab"), width = 8
-                                                              )
-                                                          ),
-                                                          
-                                                          fluidRow(
-                                                            box(
-                                                              column(width = 12, plotlyOutput("negPlot", width = "100%", height = "auto")), 
-                                                              width = 8
-                                                            )
-                                                          )),
-                                                 
-                                                 tabPanel("Housekeeping",
-                                                          box(
-                                                                     plotlyOutput("hkPlot1", width = "100%", height = "auto"),
-                                                                     br(),br(),
-                                                                     plotlyOutput("hkPlot2", width = "100%", height = "auto"),
-                                                                     width = 8
-                                                          ),
-                                                          
-                                                          box(
-                                                                     dataTableOutput("hkTab"),
-                                                                     width = 4
-                                                          )))
-                             ),
-                             
+                                              box(
+                                                dataTableOutput("posTab"),
+                                                width = 4
+                                              )),
+                                     
+                                     tabPanel("Negative Controls",
+                                              fluidRow(
+                                                
+                                                column(width = 4,
+                                                       box(
+                                                         tableOutput("negSummary"), width = NULL,
+                                                         title = "Endogenous Targets vs. Negative Controls"
+                                                       ),
+                                                       
+                                                       box(
+                                                         dataTableOutput("negGenes"), width = NULL,
+                                                         title = "Target Statistics"
+                                                       )
+                                                       
+                                                ),
+                                                
+                                                column(width = 8,
+                                                       box(
+                                                         dataTableOutput("negTab"), width = NULL,
+                                                         title = "Sample Statistics"
+                                                       ),
+                                                       
+                                                       box(
+                                                         plotlyOutput("negPlot", height = "auto"), width = NULL,
+                                                         title = "Negative Target Counts"
+                                                       )
+                                                )
+                                                
+                                                
+                                              )),
+                                     
+                                     tabPanel("Housekeeping",
+                                              box(
+                                                plotlyOutput("hkPlot1", width = "100%", height = "auto"),
+                                                br(),br(),
+                                                plotlyOutput("hkPlot2", width = "100%", height = "auto"),
+                                                width = 8
+                                              ),
+                                              
+                                              box(
+                                                dataTableOutput("hkTab"),
+                                                width = 4
+                                              )))
+                  ),
+                  
                              tabItem(tabName = "AnalysisRes",
                                                  fluidRow(
                                                    column(width = 5,
