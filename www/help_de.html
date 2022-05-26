@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="styling2.css">
+</head>
+<body>
+
+<div class = "norm" >
+  <h2>PCA</h2>
+  <p>A simple Principal Components Analysis is performed using the 'prcomp' function, and 
+  a scatterplot of the first two principal components is drawn here. Samples are represented as points,
+  colored by their Group membership, and specific sample names can be identified by hovering over the points.</p>
+  
+  <h2>Volcano Plot</h2>
+  <p>A volcano plot of the selected group vs. the base group is drawn here.  Fold change is calculated as FC =
+  (Selected Group / Base Group), so genes on the right of the plot have higher expression in the Selected Group. 
+  A log2(FC) and nominal p-value cutoff can be defined in the boxes, to draw vertical and horizontal lines (respectively)
+  on the plot. Target names (such as gene symbols) can be identified by hovering over the points.</p>
+  
+  <h2>Differential Expression</h2>
+  <p>For each analysis of Group vs. Base Group (indicated in parentheses), a table containing the following four
+  columns is provided:</p>
+  <p><b>Log2FC</b>: The log2 fold change of each gene, calculated as log2(Group / Base Group). Genes with positive 
+  log2FC have higher expression in "Group", while those with negative log2FC have higher expression in "Base Group".</p>
+  <p><b>t</b>: The comparison statistic calculated by 'limma'.</p>
+  <p><b>p-val</b>: The nominal p-value calculated by 'limma'.</p>
+  <p><b>q-val</b>: The p-value adjusted for multiple testing, using the Benjamini-Hochberg procedure.</p>
+  
+
+</div>
+
+</body>
+</html>

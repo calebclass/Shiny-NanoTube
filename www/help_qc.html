@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="styling2.css">
+</head>
+<body>
+
+<div class = "norm" >
+  <h2>Positive Controls</h2>
+  <p>The NanoTube web app identifies positive control, negative control, and housekeeping genes prior to analysis,
+  mainly based on each gene's <b>CodeClass</b> in the input data.  Positive control normalization is performed by
+  scaling all genes by 
+  the <b>Scale Factor</b> for each sample, calculated using the geometric mean of the positive control genes. 
+  Scale factors outside of the range 0.3-3 indicate high variance between samples and potential problems in the 
+  data, and these should be checked before proceeding.</p>
+  
+  <p>A scatter plot of Observed vs. Expected expression of positive control genes is also provided
+  for each sample, with the <b>R-squared</b> values provided in the table. "Expected" expression is
+  identified from the positive control gene names. Low R-squared values potentially indicate issues in detection of
+  the positive control genes.</p>
+  
+  <h2>Negative Controls</h2>
+  <p>The <b>Endogenous Targets vs. Negative Controls</b> table shows how many of the endogenous genes "passed" the 
+  comparison with negative control gene expression (defined in the <i>Setup</i> section). Genes that did not pass
+  are removed, and not included in the analyses. The comparison statistics of each gene against the negative controls 
+  are presented in the <b>Target Statistics</b> table.</p>
+  
+  <p>A table showing <b>Sample Statistics</b> for the detection of negative control genes within each sample is also provided, including 
+  the average, maximum, and standard deviation of negative control gene detection. In addition, a threshold 
+  "Background" level is  provided, and calculated using negative control gene expression as <i>cutoff = mean + 2*sd</i>. 
+  The number (and percentage) of endogenous genes with 
+  average expression below that level is presented for each sample. Samples with a high percentage of genes detected below
+  background level may present a quality concern.</p>
+  
+  <p>Finally, a scatter chart of the detected counts of each negative control in each sample is also provided.</p>
+
+  
+  <h2>Housekeeping</h2>
+  <p>As with positive control genes, a scale factor is calculated using the geometric mean of the 
+  housekeeping genes for each sample, and this is used to normalize the endogenous genes. Housekeeping
+  genes are automatically detected from RCC files, or they can be manually entered in the Advanced Options
+  on the "Job Setup" tab. Scale factors outside the range of 0.3-3 indicate high variance between samples, and
+  should be checked before proceeding.</p>
+  
+  <p>Boxplots of endogenous gene expression before and after normalization are also provided in this tab.</p>
+
+</div>
+
+</body>
+</html>

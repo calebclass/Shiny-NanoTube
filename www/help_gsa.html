@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="styling2.css">
+</head>
+<body>
+
+<div class = "norm" >
+  <p>Gene set enrichment analysis is conducted using the 'fgsea' preranked package,
+  resulting in a table of statistics and a heatmap of gene expression within specified
+  gene sets.</p>
+  
+  <h2>Options</h2>
+  <p><b>Comparison</b>: The group that will be compared against the base group.</p>
+  <p><b>Clustering Threshold</b>: Gene sets containing similar genes are clustered together to ease the 
+  interpretation of results. The overlap between two gene sets is calculated as the Jaccard index,
+  the genes overlapping between the sets divided by the union (total genes) of the sets.  Sets with an overlap
+  greater than the clustering threshold will be "clustered" together. Moving this slider
+  to the left will result in more gene sets being clustered together.</p>
+  <p><b>q-value Threshold</b>: Only gene sets with a q-value (p-value adjusted for multiple testing) 
+  below the threshold will be included in the table or heatmap. Use a threshold of 1 to 
+  include all gene sets.</p>
+  <p><b>Cluster to plot</b>: The gene set "cluster" to plot in a heatmap. The assigned
+  cluster for each gene set can be found in the results table; a cluster may contain
+  one or more gene sets.</p>
+  
+  <h2>Result Table</h2>
+  <p>This table contains the standard gene set analysis statistics for each gene set, based on the options
+  set by the user. "p.adj" is equivalent
+  to a "q-value", and the NES provides the normalized enrichment score, or the direction of the enrichment.
+  Gene sets that are more highly expressed in the "Group" will have a positive NES, while those highly expressed
+  in "Base Group" will have a negative NES.</p>
+  
+  <p>Gene sets are clustered using the Jaccard index (as defined above), and the gene set with the lowest p-value
+  within each cluster is defined as the "most enriched" gene set of the cluster ("Cluster.Max").</p>
+  
+  <h2>Heatmap</h2>
+  <p>A leading edge heatmap for a "Cluster" of gene sets can be plotted by specifying which cluster in the options.
+  Cells are colored based on the log2(expression) for each gene in each sample, centered on the median of the 
+  "Base Group". If there are more than one gene set in the cluster, gene set membership information is also
+  provided in the heatmap.</p>
+  
+</div>
+</body>
+</html>
