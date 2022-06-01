@@ -194,10 +194,18 @@ shinyServer(
     
     ####
     output$DEdownload <- downloadHandler(
-      filename = function() {"DE.csv"},
+      filename = function() {"DE_table.csv"},
       content = function(file) {
         write.csv(deResults()$de$x$data, file, 
-                  row.names = FALSE, col.names = TRUE)
+                  row.names = FALSE)
+      }
+    )
+    
+    output$GSdownload <- downloadHandler(
+      filename = function() {"GS_table.csv"},
+      content = function(file) {
+        write.csv(groupedGenesets()[,1:9], file, 
+                  row.names = FALSE)
       }
     )
     
@@ -279,6 +287,7 @@ shinyServer(
       datatable(genesetsOut[,1:9],
                 rownames = FALSE,
                 options = list(autoWidth = FALSE,
+                               scrollX = TRUE,
                                columnDefs = list(list(width = '200px', targets = "_all"),
                                                  list(className = 'dt-center', targets = 1:8)))) %>%
         formatStyle('Cluster.Max', target = 'row',

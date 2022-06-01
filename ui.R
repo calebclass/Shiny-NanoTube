@@ -65,7 +65,7 @@ dashboardPage(skin = "blue",
                                     b("Class CA, Bristow CA, Do K-A (2021). Easy NanoString Gene Expression Analysis with the Nanotube. The FASEB Journal 36(S1)."),
                                     
                                     h2("License"),
-                                    p("The NanoTube is provided with the GNU General Public License (GPL-3), and without warranty."),
+                                    p("The NanoTube and its Shiny app are provided with the GNU General Public License (GPL-3), and without warranty."),
                                     a(href="https://github.com/calebclass/Shiny-NanoTube/blob/master/LICENSE", b("GPL-3 License for NanoTube")),
                                     br(),
                                     br(),
@@ -301,6 +301,7 @@ dashboardPage(skin = "blue",
                                    box(width = NULL,
                                        
                                        DTOutput("gsTab"),
+                                       downloadButton("GSdownload","Download Table")
                                    ),
                                    
                                    box(width = NULL,
