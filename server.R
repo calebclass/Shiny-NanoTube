@@ -194,9 +194,10 @@ shinyServer(
     
     ####
     output$DEdownload <- downloadHandler(
-      filename = function() {"de.csv"},
+      filename = function() {"DE.csv"},
       content = function(file) {
-        write.csv(deResults(), file)
+        write.csv(deResults()$de$x$data, file, 
+                  row.names = FALSE, col.names = TRUE)
       }
     )
     
@@ -272,14 +273,17 @@ shinyServer(
       #### q value must be greater than or equal to the lowest value in the column
       #### Be able to print a minimum q
       req(groupedGenesets())
+      genesetsOut <- groupedGenesets()
+      genesetsOut[,2:6] <- signif(genesetsOut[,2:6], digits = 3)
       
-      datatable(groupedGenesets()[,1:9],
+      datatable(genesetsOut[,1:9],
                 rownames = FALSE,
-                options = list(autoWidth = TRUE,
-                               columnDefs = list(list(width = '200px', targets = "_all")))) %>%
+                options = list(autoWidth = FALSE,
+                               columnDefs = list(list(width = '200px', targets = "_all"),
+                                                 list(className = 'dt-center', targets = 1:8)))) %>%
         formatStyle('Cluster.Max', target = 'row',
                     color = styleEqual(c("", "x"), c('grey', 'black')),
-                    fontSize = '12px')
+                    fontSize = '12px')  # Round 2:6 (1:5 in python)
     }, rownames = FALSE
     )
     
