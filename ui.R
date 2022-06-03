@@ -43,6 +43,8 @@ dashboardPage(skin = "blue",
                                     
                                     p("NanoTube performs data processing, quality control, normalization and analysis on NanoString gene expression data."),
                                     b("Click on the Setup tab to get started."),
+                                    p("The downloadable version of this R-Shiny application can be found on GitHub, and also includes example data sets:"),
+                                    a(href = 'https://github.com/calebclass/Shiny-NanoTube', 'Shiny-NanoTube on GitHub'),
                                     
                                     br(),
                                     br(),
