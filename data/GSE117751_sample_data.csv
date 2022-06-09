@@ -1,0 +1,43 @@
+Sample_Title,GEO_Accession,Sample_Status,Sample_Type,Sample_Source,Sample_Diagnosis
+AIR patient A001,GSM3308226,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A048,GSM3308227,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A052,GSM3308228,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A061,GSM3308229,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A125,GSM3308230,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A132,GSM3308231,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A134,GSM3308232,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A135,GSM3308233,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A145,GSM3308234,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A166,GSM3308235,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A178,GSM3308236,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A213,GSM3308237,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A277,GSM3308238,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+AIR patient A286,GSM3308239,Public on Jul 28 2018,RNA,blood RNA,Autoimmune retinopathy
+RP patient R152,GSM3308240,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R172,GSM3308241,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R188,GSM3308242,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R201,GSM3308243,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R215,GSM3308244,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R223,GSM3308245,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R242,GSM3308246,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R245,GSM3308247,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R253,GSM3308248,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R261,GSM3308249,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R271,GSM3308250,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R281,GSM3308251,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R294,GSM3308252,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+RP patient R300,GSM3308253,Public on Jul 28 2018,RNA,blood RNA,Retinitis pigmentosa
+Control C010,GSM3308254,Public on Jul 28 2018,RNA,blood RNA,None
+Control C230,GSM3308255,Public on Jul 28 2018,RNA,blood RNA,None
+Control C249,GSM3308256,Public on Jul 28 2018,RNA,blood RNA,None
+Control C272,GSM3308257,Public on Jul 28 2018,RNA,blood RNA,None
+Control C273,GSM3308258,Public on Jul 28 2018,RNA,blood RNA,None
+Control C275,GSM3308259,Public on Jul 28 2018,RNA,blood RNA,None
+Control C319,GSM3308260,Public on Jul 28 2018,RNA,blood RNA,None
+Control C323,GSM3308261,Public on Jul 28 2018,RNA,blood RNA,None
+Control C324,GSM3308262,Public on Jul 28 2018,RNA,blood RNA,None
+Control C360,GSM3308263,Public on Jul 28 2018,RNA,blood RNA,None
+Control C361,GSM3308264,Public on Jul 28 2018,RNA,blood RNA,None
+Control C362,GSM3308265,Public on Jul 28 2018,RNA,blood RNA,None
+Control C363,GSM3308266,Public on Jul 28 2018,RNA,blood RNA,None
+Control C364,GSM3308267,Public on Jul 28 2018,RNA,blood RNA,None
