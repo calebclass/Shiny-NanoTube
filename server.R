@@ -302,39 +302,8 @@ shinyServer(
     })
     ############
     
-    
-    
-    
-    
-    
-    hide(id="jobSetup1")
-    hide(id="jobSetup2")
-    hide(id="jobSetup3")
-    hide(id="jobSetup4")
-    
-    hide(id = "nanoStringData")
-    hide(id ="sampleGroupClassifiers")
-    hide(id = "geneSetData")
-    
-    hide(id="qResults1")
-    hide(id="aResults1")
-    
-    observeEvent(input$setup, {
-      toggle(id = "jobSetup1")
-      toggle(id =  "jobSetup2")
-      toggle(id =  "jobSetup3")
-      toggle(id =  "jobSetup4")
-      toggle(id = "nanoStringData")
-      toggle(id = "sampleGroupClassifiers")
-      toggle(id = "geneSetData")
-      
-    })
-    observeEvent(input$qcResults, {
-      toggle(id = "qResults1")
-    })
-    observeEvent(input$anaResults, {
-      toggle(id = "aResults1")
-    })
+
+  
     
   }
 )
