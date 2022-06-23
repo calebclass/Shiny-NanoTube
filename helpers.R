@@ -36,7 +36,7 @@ housekeepingQC <- function(ns) {
   boxplot.df <- reshape::melt(boxplot.dat, "CodeClass")
   
   bg1 <- ggplot() +
-    geom_boxplot(data=boxplot.df[boxplot.df$CodeClass == "Endogenous",], 
+    geom_boxplot(data=boxplot.df[grep("endogenous", boxplot.df$CodeClass, ignore.case=TRUE),], 
                  aes(x=variable, y=value), fill="grey70") + 
     theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
     ggtitle("Raw Data") +
@@ -44,7 +44,7 @@ housekeepingQC <- function(ns) {
   
   b1 <- ggplotly(bg1, height = 150 + nrow(hk.tab) * 15)
   
-  boxplot.dat <- log2(ns$exprs[ns$dict$CodeClass == "Endogenous",]+0.5)
+  boxplot.dat <- log2(ns$exprs[grep("endogenous", ns$dict$CodeClass, ignore.case=TRUE),]+0.5)
   boxplot.df <- reshape::melt(boxplot.dat)
   
 #  samp.df <- data.frame(sample = rep(colnames(boxplot.dat),times=2),
@@ -67,7 +67,7 @@ housekeepingQC <- function(ns) {
 
 
 plotPCA <- function(ns) {
-  pca.dat <- log2(exprs(ns$dat)[fData(ns$dat)$CodeClass == "Endogenous" &
+  pca.dat <- log2(exprs(ns$dat)[grepl("endogenous", fData(ns$dat)$CodeClass, ignore.case=TRUE) &
                                  rowSums(exprs(ns$dat) == 0) == 0,]+0.5)
   
   pca <- prcomp(t(pca.dat),
