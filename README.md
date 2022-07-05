@@ -1,4 +1,5 @@
 # Shiny-NanoTube
+<a href="https://zenodo.org/badge/latestdoi/334240182"><img src="https://zenodo.org/badge/334240182.svg" alt="DOI"></a>
 
 ## Installation
 1. Download and install [RStudio (and R)](https://www.rstudio.com/products/rstudio/download/)
