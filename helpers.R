@@ -27,42 +27,64 @@ prepNegGenes <- function(ns) {
                    )))
 }
 
-housekeepingQC <- function(ns) {
+housekeepingQC <- function(ns, plotType = "RLE") {
   hk.tab <- data.frame(Sample = names(ns$hk.scalefactors),
                        `Scale Factor` = round(ns$hk.scalefactors, 2))
   
-  boxplot.dat <- as.data.frame(log2(ns$exprs.raw+0.5))
-  boxplot.dat$CodeClass <- ns$dict.raw$CodeClass
-  boxplot.df <- reshape::melt(boxplot.dat, "CodeClass")
+  if (plotType == "RLE") {
+    
+    boxplot.dat <- log2(ns$exprs.raw[grep("endogenous", ns$dict.raw$CodeClass, ignore.case=TRUE),]+0.5)
+    box1 <- ruv::ruv_rle(t(boxplot.dat), ylim = c(-2, 2)) +
+      ylab("Relative log expression") +
+      theme(axis.text.x = element_text(size = 12),
+            axis.title.x = element_text(size = 12),
+            axis.text.y = element_text(size = 14)) +
+      ylab("Relative log expression") + 
+      scale_x_discrete(limits = colnames(ns$exprs.raw)) +
+      coord_flip()
+    
+    boxplot.dat <- log2(ns$exprs[grep("endogenous", ns$dict$CodeClass, ignore.case=TRUE),]+0.5)
+    box2 <- ruv::ruv_rle(t(boxplot.dat), ylim = c(-2, 2)) +
+      theme(axis.text.x = element_text(size = 12),
+            axis.title.x = element_text(size = 12),
+            axis.text.y = element_text(size = 14)) +
+      ylab("Relative log expression") + 
+      scale_x_discrete(limits = colnames(ns$exprs)) +
+      coord_flip()
   
-  bg1 <- ggplot() +
-    geom_boxplot(data=boxplot.df[grep("endogenous", boxplot.df$CodeClass, ignore.case=TRUE),], 
-                 aes(x=variable, y=value), fill="grey70") + 
-    theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
-    ggtitle("Raw Data") +
-    coord_flip()
-  
-  b1 <- ggplotly(bg1, height = 150 + nrow(hk.tab) * 15)
-  
-  boxplot.dat <- log2(ns$exprs[grep("endogenous", ns$dict$CodeClass, ignore.case=TRUE),]+0.5)
-  boxplot.df <- reshape::melt(boxplot.dat)
-  
-#  samp.df <- data.frame(sample = rep(colnames(boxplot.dat),times=2),
-#                        scaleFactor = c(rep("Positive Control", times=ncol(boxplot.dat)), rep("Housekeeping", times=ncol(boxplot.dat))),
-#                        dat = c(ns$pc.scalefactors,
-#                                hk.scaleFactor = ns$hk.scalefactors))
-  
-  bg2 <- ggplot() +
-    geom_boxplot(data=boxplot.df, aes(x=X2, y=value), fill="grey70") + 
-    theme_classic() + xlab("") + ylab("log2(counts+0.5)") +
-    ggtitle("Normalized Data") +
-    coord_flip()
-  
-  b2 <- ggplotly(bg2, height = 150 + nrow(hk.tab) * 15)
+  } else {
+    
+    boxplot.dat <- as.data.frame(log2(ns$exprs.raw+0.5))
+    boxplot.dat$CodeClass <- ns$dict.raw$CodeClass
+    boxplot.df <- reshape::melt(boxplot.dat, "CodeClass")
+    
+    box1 <- ggplot() +
+      geom_boxplot(data=boxplot.df[grep("endogenous", boxplot.df$CodeClass, ignore.case=TRUE),], 
+                   aes(x=variable, y=value), fill="white") + 
+      theme_bw() + xlab("") + ylab("log2(counts+0.5)") +
+      theme(axis.text.x = element_text(size = 12),
+            axis.title.x = element_text(size = 12),
+            axis.text.y = element_text(size = 14)) +
+      coord_flip()
+    
+    
+    boxplot.dat <- log2(ns$exprs[grep("endogenous", ns$dict$CodeClass, ignore.case=TRUE),]+0.5)
+    boxplot.df <- reshape::melt(boxplot.dat)
+    
+    box2 <- ggplot() +
+      geom_boxplot(data=boxplot.df, aes(x=X2, y=value), fill="white") + 
+      theme_bw() + xlab("") + ylab("log2(counts+0.5)") +
+      theme(axis.text.x = element_text(size = 12),
+            axis.title.x = element_text(size = 12),
+            axis.text.y = element_text(size = 14)) +
+      coord_flip()
+    
+  }
   
   return(list(tab = hk.tab,
-              plt1 = b1,
-              plt2 = b2))
+              plt1 = box1,
+              plt2 = box2,
+              pltHeight = 150 + nrow(hk.tab) * 15))
 }
 
 

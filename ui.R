@@ -189,12 +189,14 @@ dashboardPage(skin = "blue",
                                      tabPanel("Positive Controls",
                                               box(
                                                 column(width = 12, plotlyOutput("posPlot", width = "100%", height = "auto")),
-                                                width = 8
+                                                width = 8,
+                                                title = "Observed-Expected Plots"
                                               ),
                                               
                                               box(
                                                 dataTableOutput("posTab"),
-                                                width = 4
+                                                width = 4,
+                                                title = "Sample Size Factors (Positive Controls)"
                                               )),
                                      
                                      tabPanel("Negative Controls",
@@ -229,18 +231,32 @@ dashboardPage(skin = "blue",
                                               )),
                                      
                                      tabPanel("Housekeeping",
-                                              box(
-                                                plotlyOutput("hkPlot1", width = "100%", height = "auto"),
-                                                br(),br(),
-                                                plotlyOutput("hkPlot2", width = "100%", height = "auto"),
-                                                width = 8
+                                              column(width = 8,
+                                                     box(
+                                                       column(width = 8,
+                                                              selectInput("boxplotType", label = "Boxplot Type:",
+                                                                          choices = c("RLE", "Log2(Expression)"))),
+                                                       br(), br(), br(),
+                                                       h3("Raw Data"),
+                                                       plotOutput("hkPlot1", width = "100%", height = "auto"),
+                                                       title = "Normalization Assessment",
+                                                       width = NULL
+                                                     ),
+                                                     box(
+                                                       h3("Normalized Data"),
+                                                       plotOutput("hkPlot2", width = "100%", height = "auto"),
+                                                       width = NULL
+                                                     )
                                               ),
                                               
-                                              box(
-                                                dataTableOutput("hkTab"),
-                                                width = 4
-                                              )))
-                  ),
+                                              column(width = 4,
+                                                     box(
+                                                       dataTableOutput("hkTab"),
+                                                       title = "Sample Size Factors (Housekeeping Genes)",
+                                                       width = NULL
+                                                     ))
+                                              )
+                  )),
                   
                   tabItem(tabName = "AnalysisRes",
                           fluidRow(

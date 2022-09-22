@@ -152,7 +152,10 @@ shinyServer(
     
     posQC <- reactive({ prepPosOutputs(positiveQC(ns()$dat.list)) })
     negQC <- reactive({ negativeQC(ns()$dat.list, interactive.plot = FALSE) })
-    hkQC <- reactive({ housekeepingQC(ns()$dat.list) })
+    hkQC <- reactive({ housekeepingQC(ns()$dat.list, plotType = input$boxplotType) })
+    boxHeight <- function() {
+      hkQC()$pltHeight
+    }
     pcaPlot <- reactive({ plotPCA(ns()) })
     deResults <- reactive({ deRes(ns(), input$summaryQ) })
     ####
@@ -179,8 +182,10 @@ shinyServer(
     output$negPlot <- renderPlotly({ggplotly(negQC()$plt,
                                              height = 120 + nrow(negQC()$tab) * 15 )})
     output$hkTab <- renderDataTable({datatable(hkQC()$tab, rownames = FALSE) })
-    output$hkPlot1 <- renderPlotly({hkQC()$plt1})
-    output$hkPlot2 <- renderPlotly({hkQC()$plt2})
+    output$hkPlot1 <- renderPlot({hkQC()$plt1},
+                                 height = boxHeight)
+    output$hkPlot2 <- renderPlot({hkQC()$plt2},
+                                 height = boxHeight)
     output$pcaPlot <- renderPlotly({
       req(ns())
       pcaPlot()})
