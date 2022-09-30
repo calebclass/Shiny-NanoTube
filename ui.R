@@ -135,7 +135,6 @@ dashboardPage(skin = "blue",
                                          
                                          actionButton("run",
                                                       label = "Analyze Data"),
-                                         #submitButton("Analyze Data"),
                                          
                                          br(),
                                          verbatimTextOutput("numSamps"),
@@ -230,16 +229,12 @@ dashboardPage(skin = "blue",
                                                 
                                               )),
                                      
-                                     tabPanel("Housekeeping",
+                                     tabPanel("Housekeeping Genes",
                                               column(width = 8,
                                                      box(
-                                                       column(width = 8,
-                                                              selectInput("boxplotType", label = "Boxplot Type:",
-                                                                          choices = c("RLE", "Log2(Expression)"))),
-                                                       br(), br(), br(),
                                                        h3("Raw Data"),
                                                        plotOutput("hkPlot1", width = "100%", height = "auto"),
-                                                       title = "Normalization Assessment",
+                                                       title = "Housekeeping Assessment",
                                                        width = NULL
                                                      ),
                                                      box(
@@ -255,7 +250,28 @@ dashboardPage(skin = "blue",
                                                        title = "Sample Size Factors (Housekeeping Genes)",
                                                        width = NULL
                                                      ))
+                                              ),
+                                     
+                                     tabPanel("Normalization Assessment",
+                                              column(width = 8,
+                                                     box(
+                                                       column(width = 8,
+                                                              selectInput("boxplotType", label = "Boxplot Type:",
+                                                                          choices = c("RLE", "Log2(Expression)"))),
+                                                       br(), br(), br(),
+                                                       h3("Raw Data"),
+                                                       plotOutput("normPlot1", width = "100%", height = "auto"),
+                                                       title = "Normalization Assessment",
+                                                       width = NULL
+                                                     ),
+                                                     box(
+                                                       h3("Normalized Data"),
+                                                       plotOutput("normPlot2", width = "100%", height = "auto"),
+                                                       width = NULL
+                                                     )
                                               )
+                                              
+                                     )
                   )),
                   
                   tabItem(tabName = "AnalysisRes",

@@ -42,7 +42,16 @@
   on the "Job Setup" tab. Scale factors outside the range of 0.3-3 indicate high variance between samples, and
   should be checked before proceeding.</p>
   
-  <p>Boxplots of endogenous gene expression before and after normalization are also provided in this tab.</p>
+  <p>Box and jitter plots of Relative Log Expression (RLE) are also provided for each housekeeping gene across samples, 
+  both before and after normalization. Housekeeping genes exhibiting particularly high variance after 
+  normalization indicate that these genes are not in accordance with other housekeeping genes and may 
+  need to be removed. This can be done manually in the Shiny app: go back to 
+  "Setup" screen, and input the desired Housekeeping genes in the "Advanced Options" menu.</p>
+  
+  <h2>Normalization Assessment</h2>
+  <p>Boxplots of endogenous gene expression before and after normalization are also provided in this tab. These can be
+  plotted using the log2(Expression) values, or using the Relative Log Expression (RLE) method described by 
+  LC Gandolfo and TP Speed (PLOS One, 2018).</p>
 
 </div>
 

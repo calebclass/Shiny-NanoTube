@@ -81,9 +81,43 @@ housekeepingQC <- function(ns, plotType = "RLE") {
     
   }
   
+  # Housekeeping gene plot (raw data)
+  hk.dat <- log2(ns$exprs.raw[grep("housekeep", ns$dict.raw$CodeClass, ignore.case=TRUE),]+0.5)
+  hk.medians <- apply(hk.dat, 1, median)
+  hk.dat <- hk.dat - hk.medians
+  
+  rownames(hk.dat) <- ns$dict.raw$Name[grep("housekeep", ns$dict.raw$CodeClass, ignore.case=TRUE)]
+  hk.plot <- reshape::melt(hk.dat)
+  jitter1 <- ggplot(data = hk.plot, aes(x = X1, y = value)) +
+    geom_boxplot() +
+    geom_jitter(height = 0, width = 0.25) +
+    theme_bw() + xlab("") + ylab("RLE") +
+    theme(axis.text.x = element_text(size = 12),
+          axis.title.x = element_text(size = 12),
+          axis.text.y = element_text(size = 14)) +
+    coord_flip()
+    
+  # Housekeeping gene plot (normalized data)
+  hk.dat <- log2(ns$exprs[grep("housekeep", ns$dict$CodeClass, ignore.case=TRUE),]+0.5)
+  hk.medians <- apply(hk.dat, 1, median)
+  hk.dat <- hk.dat - hk.medians
+  
+  rownames(hk.dat) <- ns$dict$Name[grep("housekeep", ns$dict$CodeClass, ignore.case=TRUE)]
+  hk.plot <- reshape::melt(hk.dat)
+  jitter2 <- ggplot(data = hk.plot, aes(x = X1, y = value)) +
+    geom_boxplot() +
+    geom_jitter(height = 0, width = 0.25) +
+    theme_bw() + xlab("") + ylab("RLE") +
+    theme(axis.text.x = element_text(size = 12),
+          axis.title.x = element_text(size = 12),
+          axis.text.y = element_text(size = 14)) +
+    coord_flip()
+  
   return(list(tab = hk.tab,
               plt1 = box1,
               plt2 = box2,
+              j1 = jitter1,
+              j2 = jitter2,
               pltHeight = 150 + nrow(hk.tab) * 15))
 }
 
