@@ -126,11 +126,13 @@ plotPCA <- function(ns) {
   pca.dat <- log2(exprs(ns$dat)[grepl("endogenous", fData(ns$dat)$CodeClass, ignore.case=TRUE) &
                                  rowSums(exprs(ns$dat) == 0) == 0,]+0.5)
   
+  gp <- pData(ns$deRes$eset)$group
+  
   pca <- prcomp(t(pca.dat),
                 center = TRUE, scale = TRUE)
   pca.ly <- as.data.frame(pca$x[,1:2])
   pca.ly$sample <- row.names(pca$x)
-  pca.ly$group <- pData(ns$deRes$eset)$group
+  if (!is.null(gp)) pca.ly$group <- gp
   
   perc.var <- pca$sdev^2 / sum(pca$sdev^2) * 100
   
@@ -146,10 +148,17 @@ plotPCA <- function(ns) {
   layout.x$title <- paste0("PC1 (", signif(perc.var[1], 2), "% var)")
   layout.y$title <- paste0("PC2 (", signif(perc.var[2], 2), "% var)")
   
-  plt <- plot_ly(data = pca.ly, x = ~PC1, y = ~PC2,
-                 text = ~paste0("Sample: ", sample), color = ~group,
-                 type = "scatter", mode = "markers") %>%
-    layout(xaxis = layout.x, yaxis = layout.y)
+  if (is.null(gp)) {
+    plt <- plot_ly(data = pca.ly, x = ~PC1, y = ~PC2,
+                   text = ~paste0("Sample: ", sample),
+                   type = "scatter", mode = "markers") %>%
+      layout(xaxis = layout.x, yaxis = layout.y)
+  } else {
+    plt <- plot_ly(data = pca.ly, x = ~PC1, y = ~PC2,
+                   text = ~paste0("Sample: ", sample), color = ~group,
+                   type = "scatter", mode = "markers") %>%
+      layout(xaxis = layout.x, yaxis = layout.y)
+  }
   
   return(plt)
 }
@@ -164,11 +173,12 @@ deRes <- function(ns, summaryQ) {
   
   if (ncol(diffExpr.tab) == 1) {
     colnames(diffExpr.tab) <- ""
-    rownames(diffExpr.tab) <- c(paste0("Higher in ", colnames(ns$deRes$q.value)[!(colnames(ns$deRes$q.value) %in% c("Intercept", "(Intercept)"))]),
-                                 paste0("Higher in ", ns$base.group))
+    gp <- colnames(ns$deRes$q.value)[!(colnames(ns$deRes$q.value) %in% c("Intercept", "(Intercept)"))]
+    rownames(diffExpr.tab) <- c(paste0("logFC > 0 for ", gp),
+                                 paste0("logFC < 0 for ", gp))
   } else {
-    rownames(diffExpr.tab) <- c("Higher in Group", 
-                                paste0("Higher in ", ns$base.group))
+    rownames(diffExpr.tab) <- c("logFC > 0", 
+                                "logFC < 0")
   }
   
   
@@ -206,13 +216,16 @@ deRes <- function(ns, summaryQ) {
 
 
 plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsDir) {
-  # Prepare data
-#  diffExpr <- makeDiffExprFile(ns$deRes, filename = NULL)
-#  dat.scaled <- diffExpr[,-(1:(4*(ncol(ns$deRes$t)-1)))]
-  dat.scaled <- exprs(ns$deRes$eset) -
-    apply(exprs(ns$deRes$eset)[,ns$deRes$eset$group == 
-                                     levels(ns$deRes$eset$group)[1]], 
-          1, median)
+  
+  if (is.null(ns$deRes$eset$group)) {
+    dat.scaled <- exprs(ns$deRes$eset) -
+      apply(exprs(ns$deRes$eset), 1, median)
+  } else {
+    dat.scaled <- exprs(ns$deRes$eset) -
+      apply(exprs(ns$deRes$eset)[,ns$deRes$eset$group == 
+                                   levels(ns$deRes$eset$group)[1]], 
+            1, median)
+  }
   
   # Force all data between -3 & 3 (log-scale)
   hm.max <- 3
@@ -252,20 +265,24 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
   sample.groups <- gsub(" ", ".", ns$dat$groups)
   base.group <- gsub(" ", ".", ns$base.group)
   
+  title.y <- 1.15
+  margin.plots <- list(b = 100, t = 80)
+  
   # Split to Base & Comparison group
-  dat.hmB <- dat.hm[, sample.groups == base.group]
-  dat.hmC <- dat.hm[, sample.groups == gsComp]
+  if (is.null(ns$deRes$eset$group)) {
+    base.group <- ""
+    dat.hmB <- dat.hm
+    samp_namesB <- colnames(dat.scaled)
+  } else {
+    dat.hmB <- dat.hm[, sample.groups == base.group]
+    dat.hmC <- dat.hm[, sample.groups == gsComp]
+    samp_namesB <- colnames(dat.scaled)[sample.groups == base.group]
+  }
 
   dat.hmB <- reshape::melt(dat.hmB)
   dat.hmB$X1 <- factor(dat.hmB$X1, levels = genes)
-  dat.hmB$X2 <- factor(dat.hmB$X2, levels = colnames(dat.scaled)[sample.groups == base.group])
+  dat.hmB$X2 <- factor(dat.hmB$X2, levels = samp_namesB)
   colnames(dat.hmB)[3] <- "expression"
-  
-  dat.hmC <- reshape::melt(dat.hmC)
-  dat.hmC$X1 <- factor(dat.hmC$X1, levels = genes)
-  dat.hmC$X2 <- factor(dat.hmC$X2, levels = colnames(dat.scaled)[sample.groups == gsComp])
-  colnames(dat.hmC)[3] <- "expression"
-  ay2$showticklabels <- FALSE
   
   if (length(subClust) > 1) {
     annot_row.hm <- reshape::melt(annot_row.df)
@@ -274,12 +291,7 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
     ay1$showticklabels <- FALSE
   }
   
-  rel.width.B <- sum(sample.groups == base.group) / sum(sample.groups %in% c(base.group, gsComp))
-  rel.width.C <- 1 - rel.width.B
-  title.y <- 1.15
-  margin.plots <- list(b = 100, t = 80)
-  
-  # Heatmap for Base Group
+  # Heatmap for Base Group (or all data if design matrix was used)
   pHM_Base <- plot_ly(data = dat.hmB, x = ~X2, y = ~X1, z = ~expression, xgap = 2, ygap = 2, 
                  type = "heatmap", colors = colorRamp(c("blue", "white", "red")), alpha = 1,
                  zauto = FALSE, zmax = hm.max, zmin = -hm.max) %>%
@@ -291,21 +303,31 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
                     x = dat.hmB$X2[1], y = title.y,
                     xref = "x", yref = "paper", showarrow = FALSE, 
                     font = list(size = 20), xanchor = "left")
-
-  # Heatmap for Comparison Group
-  pHM_Comp <- plot_ly(data = dat.hmC, x = ~X2, y = ~X1, z = ~expression, xgap = 2, ygap = 2, 
-                      type = "heatmap", colors = colorRamp(c("blue", "white", "red")), alpha = 1,
-                      zauto = FALSE, zmax = hm.max, zmin = -hm.max, showscale = FALSE) %>%
-    layout(xaxis = ax1, yaxis = ay2, margin = margin.plots) %>%
-    add_annotations(text = gsub("\\.", " ", gsComp),
-                    x = dat.hmC$X2[1], y = title.y,
-                    xref = "x", yref = "paper", showarrow = FALSE,
-                    font = list(size = 20), xanchor = "left")
+  
+  # Hetmap for Comparison Group
+  if (!is.null(ns$deRes$eset$group)) {
+    dat.hmC <- reshape::melt(dat.hmC)
+    dat.hmC$X1 <- factor(dat.hmC$X1, levels = genes)
+    dat.hmC$X2 <- factor(dat.hmC$X2, levels = colnames(dat.scaled)[sample.groups == gsComp])
+    colnames(dat.hmC)[3] <- "expression"
+    ay2$showticklabels <- FALSE
+    
+    rel.width.B <- sum(sample.groups == base.group) / sum(sample.groups %in% c(base.group, gsComp))
+    rel.width.C <- 1 - rel.width.B
+    
+    # Heatmap for Comparison Group
+    pHM_Comp <- plot_ly(data = dat.hmC, x = ~X2, y = ~X1, z = ~expression, xgap = 2, ygap = 2, 
+                        type = "heatmap", colors = colorRamp(c("blue", "white", "red")), alpha = 1,
+                        zauto = FALSE, zmax = hm.max, zmin = -hm.max, showscale = FALSE) %>%
+      layout(xaxis = ax1, yaxis = ay2, margin = margin.plots) %>%
+      add_annotations(text = gsub("\\.", " ", gsComp),
+                      x = dat.hmC$X2[1], y = title.y,
+                      xref = "x", yref = "paper", showarrow = FALSE,
+                      font = list(size = 20), xanchor = "left")
+  }
   
   # Leading Edge Heatmap (If more than 1 gene set included)
   if (length(subClust) > 1) {
-    rel.width.ledge <- 0.8*ncol(annot_row) / (ncol(annot_row) + 
-                                                sum(sample.groups %in% c(base.group, gsComp))) 
     
     pCB <- plot_ly(data = annot_row.hm, x = ~X2, y = ~X1, z = ~value, xgap = 2, ygap = 2,
                    type = "heatmap", colors = colorRamp(c("grey95", "black")), alpha = 1, 
@@ -315,9 +337,21 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
 #                      x = 0, y = title.y,
 #                      xref = "paper", yref = "paper", showarrow = FALSE)
     
-    return(subplot(pCB, pHM_Base, pHM_Comp, nrows = 1, widths = c(rel.width.ledge, rel.width.B, rel.width.C) / (1+rel.width.ledge)))
+    if (is.null(ns$deRes$eset$group)) {
+      rel.width.ledge <- 0.8*ncol(annot_row) / (ncol(annot_row) + ncol(dat.hmB))
+      return(subplot(pCB, pHM_Base, nrows = 1, widths = c(rel.width.ledge, 1) / (1+rel.width.ledge)))
+    } else {
+      rel.width.ledge <- 0.8*ncol(annot_row) / (ncol(annot_row) + 
+                                                  sum(sample.groups %in% c(base.group, gsComp))) 
+      return(subplot(pCB, pHM_Base, pHM_Comp, nrows = 1, widths = c(rel.width.ledge, rel.width.B, rel.width.C) / (1+rel.width.ledge)))
+    }
   } else {
-    return(subplot(pHM_Base, pHM_Comp, nrows = 1, widths = c(rel.width.B, rel.width.C)))
+    if (is.null(ns$deRes$eset$group)) {
+      return(pHM_Base)
+    } else {
+      return(subplot(pHM_Base, pHM_Comp, nrows = 1, widths = c(rel.width.B, rel.width.C)))
+    }
+    
   }
   
 }

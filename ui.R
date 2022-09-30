@@ -105,8 +105,14 @@ dashboardPage(skin = "blue",
                                          bsTooltip("phen",
                                                    "This should be a CSV file, containing sample information.",
                                                    placement = "bottom", trigger = "hover", options = NULL),
-                                         
-                                         
+                                         div(style = "margin-top: -20px"),
+                                         checkboxInput("phenModel",
+                                                       label = "Advanced: 'Sample info table' is a design matrix",
+                                                       value = FALSE),
+                                         bsTooltip("phenModel",
+                                                   "This is an option for advanced users. Please see Help page for more information.",
+                                                   placement = "bottom", trigger = "hover", options = NULL),
+                                    
                                          
                                          # Read columns in Sample info table, asks user which column corresponds to "Group"
                                          fluidRow(
@@ -294,8 +300,8 @@ dashboardPage(skin = "blue",
                             ),
                             column(width = 7,
                                    box(title = "Summary", width = NULL,
-                                       column(width = 4, 
-                                              numericInput('summaryQ', 'q-val cutoff', value = 0.05, min = 0, max = 1)),
+                                        
+                                       numericInput('summaryQ', 'q-val cutoff', value = 0.05, min = 0, max = 1),
                                        tableOutput("deCounts")),
                                    
                                    box(

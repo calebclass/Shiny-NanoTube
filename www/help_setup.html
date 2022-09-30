@@ -19,10 +19,24 @@
   table will be merged in the order they're supplied. The merge can be checked prior to 
   analysis using "Check Samples", to make sure they match.</p>
   
+  <h3><i>Advanced:</i> Design Matrix Input</h3>
+  <p><b>Check this box only if you input a Design Matrix as described here.</b><br>
+  For more complex experimental designs (for example, involving multiple factors or 
+  numeric factors, this can be overruled by inputting a Model Matrix (or Design Matrix) in this step.  
+  This should be input as a csv or txt file (similar to the sample info table), 
+  where each row is a sample and each column is a factor. This can be generated
+  manually or using R, with the model.matrix() function. For proper functioning in this web app, the first column should be
+  the Intercept term (equal to 1 for all samples), and other columns should be 0/1 for group variables (not including 
+  control group) or numeric for numeric variables. An example model matrix is provided in the data folder of the 
+  Shiny-NanoTube github repository.</p>
+  
   <h2>Group Column</h2>
   <p>After loading the sample info table, a dropdown box will appear, containing the columns
   from that table (such as the "Treatment" column). Select the column containing the group 
   information for differential expression analysis.</p>
+  
+  <p>If the user input a design matrix instead, the "Group Column" and "Base Group" options
+  are not shown.</p>
   
   <h2>Base Group</h2>
   <p>This is the group that all other groups will be compared against (i.e. the 

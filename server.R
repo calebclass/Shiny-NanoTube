@@ -10,23 +10,35 @@ shinyServer(
     
     output$phenCol_input <- renderUI({
       req(sample_info())
-      selectInput(inputId = "phenCol",
-                  label = "Group Column",
-                  choices = colnames(sample_info()))
+      if (!input$phenModel) {
+        selectInput(inputId = "phenCol",
+                    label = "Group Column",
+                    choices = colnames(sample_info()))
+      }
     })
     
     output$basePhen_input <- renderUI({
       req(sample_info(), input$phenCol)
-      selectInput(inputId = "basePhen",
-                  label = "Base Group",
-                  choices = unique(sample_info()[,input$phenCol]))
+      if (!input$phenModel) {
+        selectInput(inputId = "basePhen",
+                    label = "Base Group",
+                    choices = unique(sample_info()[,input$phenCol]))
+      }
+    })
+    
+    phenCol <- reactive({
+      if (input$phenModel) {
+        NULL
+      } else {
+        input$phenCol
+      }
     })
     
     merged_info <- eventReactive(input$check, {
       req(input$expr, input$phen)
       nanostringData <- processNanostringData(input$expr$datapath,
                                               sampleTab = input$phen$datapath,
-                                              groupCol = input$phenCol,
+                                              groupCol = phenCol(),
                                               normalization = "none",
                                               includeQC = FALSE,
                                               output.format = "list")
@@ -35,8 +47,14 @@ shinyServer(
     output$merged_info <- renderDataTable({
       req(merged_info())
       
-      checkTable <- datatable(cbind(data.frame(Filename = colnames(merged_info()$exprs), 
-                                     Group = merged_info()$groups),
+      if (input$phenModel) {
+        tab1 <- data.frame(Filename = colnames(merged_info()$exprs))
+      } else {
+        tab1 <- data.frame(Filename = colnames(merged_info()$exprs), 
+                           Group = merged_info()$groups)
+      }
+      
+      checkTable <- datatable(cbind(tab1,
                           merged_info()$samples),
                           rownames = FALSE,
                           options = list(
@@ -49,12 +67,6 @@ shinyServer(
                             pageLength = 10
                           ))  # thanks to https://stackoverflow.com/questions/57946206/how-to-resize-a-datatable-in-order-to-fit-it-in-a-box-for-shinydashboard
     })
-    
-#    observeEvent(input$run, {
-#      updateNavbarPage(session, "master",
-#                       selected = "QC Results"
-#      )
-#    })
     
     ns <- eventReactive(input$run, {
       
@@ -70,7 +82,7 @@ shinyServer(
         
         nanostringData <- processNanostringData(input$expr$datapath,
                                                 sampleTab = input$phen$datapath,
-                                                groupCol = input$phenCol,
+                                                groupCol = phenCol(),
                                                 bgType = "t.test", bgPVal = input$bgP,
                                                 housekeeping = hk.genes,
                                                 includeQC = FALSE)
@@ -87,7 +99,7 @@ shinyServer(
         # This will be updated in NanoTube R package
         nanostringDataBG2 <- processNanostringData(input$expr$datapath,
                                                 sampleTab = input$phen$datapath,
-                                                groupCol = input$phenCol,
+                                                groupCol = phenCol(),
                                                 bgType = "t.test", bgPVal = input$bgP,
                                                 housekeeping = hk.genes,
                                                 includeQC = FALSE,
@@ -112,21 +124,17 @@ shinyServer(
           rownames(nanostringDataBG$bg.stats) <-
           gsub(".*\\/|\\.RCC", "", colnames(nanostringData))
         
-        #      if (is.null(input$phen$datapath)) {
-        #        groups <- gsub("_.*", "", colnames(nanostringData))
-        #      } else {
-        #        groups <- as.character(read.table(file = input$phen$datapath, sep = "", as.is = TRUE))
-        #      }
-        
-        #      if (input$basePhen == "") {
-        #        base.group <- groups[1]
-        #      } else {
-        base.group <- input$basePhen
-        #      }
-        
         incProgress(1/4, detail = "Analyzing Diff. Expr.")
         
-        limmaResults <- runLimmaAnalysis(nanostringData, NULL, base.group)
+        if (input$phenModel) {
+          # Design matrix has had 2 extra columns added -- these should be removed
+          base.group <- "Intercept"
+          design.mat <- pData(nanostringData)[,2:(ncol(pData(nanostringData))-1)]
+          limmaResults <- runLimmaAnalysis(nanostringData, design = design.mat)
+        } else {
+          base.group <- input$basePhen
+          limmaResults <- runLimmaAnalysis(nanostringData, groups = NULL, base.group)
+        }
         
         ns <- list(dat = nanostringData,
                    dat.list = nanostringDataBG,
@@ -168,8 +176,6 @@ shinyServer(
     
     ###
     
-    #####
-
     output$posTab <- renderDataTable({ posQC()$DT })
     output$posPlot <- renderPlotly({ posQC()$plotly })
     output$negTab <- renderDataTable({datatable(negQC()$tab, rownames = TRUE,
@@ -260,7 +266,7 @@ shinyServer(
         #    ),
         #    column(12,
         numericInput("gsQthresh", label = "q-value threshold:", value = 1, step = 0.05),
-        numericInput("gsClust", label = "Cluster to plot:", value = 1, step = 1)
+        numericInput("gsClust", label = "Cluster for heatmap:", value = 1, step = 1)
         #    )
       )
       #)
