@@ -46,23 +46,42 @@
   
   <h2>Gene Set Database</h2>
   <p>Required only for Gene Set Analysis feature. Gene set database (gmt format, such as those found at MSigDB)
-  can be loaded here. Alternatively, an rds file could also be loaded, containing the gene set database in list form (each member of the list is a vector of genes from one gene set). The REACTOME database is provided as a gmt file in the GitHub "data" folder.</p>
+  can be loaded here. An rds file could also be loaded, containing the gene set database in list form (each member of the 
+  list is a vector of genes from one gene set). Alternatively, the REACTOME database can automattically be used without inputting 
+  any database file, by clicking the checkbox below the Gene set database input.</p>
   <p>Reference: Gillespie M <i>et al.</i> The reactome pathway knowledgebase 2022, <i>Nucleic Acids Research.</i> 2021; gkab1028, https://doi.org/10.1093/nar/gkab1028</p>
   
   <h2>Advanced Options</h2>
+  <h3>Normalization Method</h3>
+  <p>The Shiny app allows normalization using either the standard "nSolver" method,
+  which conducts scaling normalization using positive control and housekeeping genes; or
+  with the "RUVg" method (Risso et al., 2014), which Removes Unwanted Variation 
+  based on housekeeping genes.</p>
+  
   <h3>Housekeeping Genes</h3>
   <p>NanoTube will automatically identify housekeeping genes for normalization by selecting
   those marked as "Housekeeping" in the <b>CodeClass</b>. Alternatively, these can be manually
   specified with this option, by inputting a comma-separated list of genes to be used as housekeeping genes.</p>
   
   <h3>Negative Control Threshold</h3>
-  <p>The NanoTube app performs a two-sample, one-sided t test for each gene: this test compares the
+  <p>This step can be applied with any normalization method. The NanoTube app performs a two-sample, one-sided t test for each gene: this test compares the
   expression of that gene across all samples vs. the expression of all negative control genes
   across all samples. The p-value of this test is for the null hypothesis that the endogenous gene does
   not have expression above the negative control genes. In this field, you can specify the signifance
   level required to keep a gene for analysis. A lower value is a more stringent threshold: 
   genes with a p-value above this level will be removed, and not
   included in differential expression or gene set analysis. To skip this step, this value can be set to 2.</p>
+  
+  <h3>Number of Unwanted Factors</h3>
+  <p>User can specify the number of unwanted factors to remove from the data (for RUV 
+  normalization methods only). 1 is usually a good first guess, but it may need to
+  be increased if variation based on batch/unwanted effects remains.</p>
+  
+  <h3>Number of Singular Values to drop</h3>
+  <p>The number of signular values to drop when estimating unwanted variation factors (RUVg
+  normalization only). 0 is a good first guess for this one, but it could be set to 1
+  if the first singular value captures the effect of interest, for example. This number 
+  must be less than the number of unwanted factors.</p>
   
   <h3>Minimum Gene Set Size</h3>
   <p>In this field, you can set the number of genes required for an individual gene set (from a loaded gmt file)

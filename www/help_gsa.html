@@ -32,7 +32,10 @@
   in "Base Group" will have a negative NES.</p>
   
   <p>Gene sets are clustered using the Jaccard index (as defined above), and the gene set with the lowest p-value
-  within each cluster is defined as the "most enriched" gene set of the cluster ("Cluster.Max").</p>
+  within each cluster is defined as the "most enriched" gene set of the cluster ("Cluster.Max"). The developers 
+  generally recommend that the user focus on the gene set within each cluster with the lowest p-value, as this
+  one may be responsible for the detected enrichment of the other gene sets. However, this recommendation is not
+  absolute, as multiple similar pathways may be providing unique contributions.</p>
   
   <h2>Heatmap</h2>
   <p>A leading edge heatmap for a "Cluster" of gene sets can be plotted by specifying which cluster in the options.

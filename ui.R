@@ -135,6 +135,15 @@ dashboardPage(skin = "blue",
                                          bsTooltip("gsDb",
                                                    "A gene set database file, either in .gmt format or an .rds file containing an R-format list of gene sets",
                                                    placement = "bottom", trigger = "hover", options = NULL),
+                                         div(style = "margin-top: -20px"),
+                                         checkboxInput("gsReactome",
+                                                       label = "Use the REACTOME database for GSEA",
+                                                       value = FALSE),
+                                         bsTooltip("gsReactome",
+                                                   "The REACTOME database can be used instead of loading in a .gmt database. Reference: M Gillespie et. al. (2022). The reactome pathway knowledgebase 2022.",
+                                                   placement = "bottom", trigger = "hover", options = NULL),
+                                         
+                                         br(), 
                                          
                                          actionButton("check",
                                                       label = "Check Samples"),
@@ -153,6 +162,11 @@ dashboardPage(skin = "blue",
                                        
                                        h4("Normalization Options", id = "gseaTxt"),
                                        
+                                       selectInput("normMethod",
+                                                   label = "Normalization Method",
+                                                   choices = c("nSolver", "RUVg"),
+                                                   selected = "nSolver"),
+                                       
                                        textInput("hk",
                                                  label = "Housekeeping Genes",
                                                  value = ""),
@@ -166,6 +180,16 @@ dashboardPage(skin = "blue",
                                                     max = 2),
                                        bsTooltip("bgP",
                                                  "Expression threshold (vs. negative control genes) for inclusion, in the form of a p-value from a 2-sample t test (see Help). To include all genes in analysis, set to 2."),
+                                       
+                                       numericInput("nUnwanted",
+                                                    label = "Number of Unwanted Factors (RUV normalization only)",
+                                                    value = 1,
+                                                    min = 1),
+                                       
+                                       numericInput("RUVgDrop",
+                                                    label = "Number of Singular Values to drop (RUVg normalization only)",
+                                                    value = 0,
+                                                    min = 0),
                                        
                                        h4("Gene Set Analysis Options", id = "gseaTxt"),
                                        

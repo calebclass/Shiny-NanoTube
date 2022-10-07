@@ -83,8 +83,11 @@ shinyServer(
         nanostringData <- processNanostringData(input$expr$datapath,
                                                 sampleTab = input$phen$datapath,
                                                 groupCol = phenCol(),
+                                                normalization = input$normMethod,
                                                 bgType = "t.test", bgPVal = input$bgP,
                                                 housekeeping = hk.genes,
+                                                n.unwanted = input$nUnwanted,
+                                                RUVg.drop = input$RUVgDrop,
                                                 includeQC = FALSE)
         
         incProgress(1/4, detail = "Normalizing Data")
@@ -105,16 +108,7 @@ shinyServer(
                                                 includeQC = FALSE,
                                                 output.format = "list")
         
-        
-        #      file_input <- input$expr$datapath
-        #      file.extension <- substr(file_input[1], 
-        #                               (nchar(file_input[1])-3), nchar(file_input[1]))
-        #      if(file.extension %in% c(".zip",".ZIP")){
-        #        file_input <- unzip(file_input)
-        #        file_input <-read_merge_rcc(file_input)
-        #        nanoTableData <- file_input
-        #        output$nanoTable <- renderTable(file_input)
-        #      }
+
         
         colnames(nanostringData) <- 
           colnames(nanostringDataBG$exprs.raw) <-
@@ -127,7 +121,7 @@ shinyServer(
         incProgress(1/4, detail = "Analyzing Diff. Expr.")
         
         if (input$phenModel) {
-          # Design matrix has had 2 extra columns added -- these should be removed
+          # Design matrix has had 2 extra columns added -- these are removed here.
           base.group <- "Intercept"
           design.mat <- pData(nanostringData)[,2:(ncol(pData(nanostringData))-1)]
           limmaResults <- runLimmaAnalysis(nanostringData, design = design.mat)
@@ -145,6 +139,10 @@ shinyServer(
         if (!is.null(input$gsDb$datapath)) {
           incProgress(1/6, detail = "Analyzing Gene Sets")
           ns$gsRes <- limmaToFGSEA(limmaResults, input$gsDb$datapath,
+                                   min.set = input$minSize)
+        } else if (input$gsReactome) {
+          incProgress(1/6, detail = "Analyzing Gene Sets")
+          ns$gsRes <- limmaToFGSEA(limmaResults, "data/ReactomePathways.gmt",
                                    min.set = input$minSize)
         }
         
