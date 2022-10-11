@@ -8,9 +8,10 @@
 <div class = "norm" >
   <h2>Positive Controls</h2>
   <p>The NanoTube web app identifies positive control, negative control, and housekeeping genes prior to analysis,
-  mainly based on each gene's <b>CodeClass</b> in the input data.  Positive control normalization is performed by
-  scaling all genes by 
+  mainly based on each gene's <b>CodeClass</b> in the input data.  If "nSolver" normalization was selected, 
+  positive control normalization is performed by scaling all genes by 
   the <b>Scale Factor</b> for each sample, calculated using the geometric mean of the positive control genes. 
+  This scaling is not conducted for "RUVg" normalization, but the scale factors are provided for QC purposes.
   Scale factors outside of the range 0.3-3 indicate high variance between samples and potential problems in the 
   data, and these should be checked before proceeding.</p>
   
@@ -37,10 +38,10 @@
   
   <h2>Housekeeping</h2>
   <p>As with positive control genes, a scale factor is calculated using the geometric mean of the 
-  housekeeping genes for each sample, and this is used to normalize the endogenous genes. Housekeeping
+  housekeeping genes for each sample, and this is used to normalize the endogenous genes ("nSolver" method only). Housekeeping
   genes are automatically detected from RCC files, or they can be manually entered in the Advanced Options
-  on the "Job Setup" tab. Scale factors outside the range of 0.3-3 indicate high variance between samples, and
-  should be checked before proceeding.</p>
+  on the "Job Setup" tab. This scaling is not conducted for "RUVg" normalization, but the scale factors are provided for QC purposes. 
+  Scale factors outside the range of 0.3-3 indicate high variance between samples, and should be checked before proceeding.</p>
   
   <p>Box and jitter plots of Relative Log Expression (RLE) are also provided for each housekeeping gene across samples, 
   both before and after normalization. Housekeeping genes exhibiting particularly high variance after 

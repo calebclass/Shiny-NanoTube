@@ -28,34 +28,34 @@ prepNegGenes <- function(ns) {
 }
 
 housekeepingQC <- function(ns, plotType = "RLE") {
-  hk.tab <- data.frame(Sample = names(ns$hk.scalefactors),
-                       `Scale Factor` = round(ns$hk.scalefactors, 2))
+  hk.tab <- data.frame(Sample = names(ns$dat.list$hk.scalefactors),
+                       `Scale Factor` = round(ns$dat.list$hk.scalefactors, 2))
   
   if (plotType == "RLE") {
     
-    boxplot.dat <- log2(ns$exprs.raw[grep("endogenous", ns$dict.raw$CodeClass, ignore.case=TRUE),]+0.5)
+    boxplot.dat <- log2(ns$dat.list$exprs.raw[grep("endogenous", ns$dat.list$dict.raw$CodeClass, ignore.case=TRUE),]+0.5)
     box1 <- ruv::ruv_rle(t(boxplot.dat), ylim = c(-2, 2)) +
       ylab("Relative log expression") +
       theme(axis.text.x = element_text(size = 12),
             axis.title.x = element_text(size = 12),
             axis.text.y = element_text(size = 14)) +
       ylab("Relative log expression") + 
-      scale_x_discrete(limits = colnames(ns$exprs.raw)) +
+      scale_x_discrete(limits = colnames(ns$dat.list$exprs.raw)) +
       coord_flip()
     
-    boxplot.dat <- log2(ns$exprs[grep("endogenous", ns$dict$CodeClass, ignore.case=TRUE),]+0.5)
+    boxplot.dat <- log2(exprs(ns$dat)[grep("endogenous", fData(ns$dat)$CodeClass, ignore.case=TRUE),]+0.5)
     box2 <- ruv::ruv_rle(t(boxplot.dat), ylim = c(-2, 2)) +
       theme(axis.text.x = element_text(size = 12),
             axis.title.x = element_text(size = 12),
             axis.text.y = element_text(size = 14)) +
       ylab("Relative log expression") + 
-      scale_x_discrete(limits = colnames(ns$exprs)) +
+      scale_x_discrete(limits = colnames(exprs(ns$dat))) +
       coord_flip()
   
   } else {
     
-    boxplot.dat <- as.data.frame(log2(ns$exprs.raw+0.5))
-    boxplot.dat$CodeClass <- ns$dict.raw$CodeClass
+    boxplot.dat <- as.data.frame(log2(ns$dat.list$exprs.raw+0.5))
+    boxplot.dat$CodeClass <- ns$dat.list$dict.raw$CodeClass
     boxplot.df <- reshape::melt(boxplot.dat, "CodeClass")
     
     box1 <- ggplot() +
@@ -68,7 +68,7 @@ housekeepingQC <- function(ns, plotType = "RLE") {
       coord_flip()
     
     
-    boxplot.dat <- log2(ns$exprs[grep("endogenous", ns$dict$CodeClass, ignore.case=TRUE),]+0.5)
+    boxplot.dat <- log2(exprs(ns$dat)[grep("endogenous", fData(ns$dat)$CodeClass, ignore.case=TRUE),]+0.5)
     boxplot.df <- reshape::melt(boxplot.dat)
     
     box2 <- ggplot() +
@@ -82,11 +82,11 @@ housekeepingQC <- function(ns, plotType = "RLE") {
   }
   
   # Housekeeping gene plot (raw data)
-  hk.dat <- log2(ns$exprs.raw[grep("housekeep", ns$dict.raw$CodeClass, ignore.case=TRUE),]+0.5)
+  hk.dat <- log2(ns$dat.list$exprs.raw[grep("housekeep", ns$dat.list$dict.raw$CodeClass, ignore.case=TRUE),]+0.5)
   hk.medians <- apply(hk.dat, 1, median)
   hk.dat <- hk.dat - hk.medians
   
-  rownames(hk.dat) <- ns$dict.raw$Name[grep("housekeep", ns$dict.raw$CodeClass, ignore.case=TRUE)]
+  rownames(hk.dat) <- ns$dat.list$dict.raw$Name[grep("housekeep", ns$dat.list$dict.raw$CodeClass, ignore.case=TRUE)]
   hk.plot <- reshape::melt(hk.dat)
   jitter1 <- ggplot(data = hk.plot, aes(x = X1, y = value)) +
     geom_boxplot() +
@@ -98,11 +98,11 @@ housekeepingQC <- function(ns, plotType = "RLE") {
     coord_flip()
     
   # Housekeeping gene plot (normalized data)
-  hk.dat <- log2(ns$exprs[grep("housekeep", ns$dict$CodeClass, ignore.case=TRUE),]+0.5)
+  hk.dat <- log2(ns$dat.list$exprs[grep("housekeep", ns$dat.list$dict$CodeClass, ignore.case=TRUE),]+0.5)
   hk.medians <- apply(hk.dat, 1, median)
   hk.dat <- hk.dat - hk.medians
   
-  rownames(hk.dat) <- ns$dict$Name[grep("housekeep", ns$dict$CodeClass, ignore.case=TRUE)]
+  rownames(hk.dat) <- ns$dat.list$dict$Name[grep("housekeep", ns$dat.list$dict$CodeClass, ignore.case=TRUE)]
   hk.plot <- reshape::melt(hk.dat)
   jitter2 <- ggplot(data = hk.plot, aes(x = X1, y = value)) +
     geom_boxplot() +
@@ -118,7 +118,8 @@ housekeepingQC <- function(ns, plotType = "RLE") {
               plt2 = box2,
               j1 = jitter1,
               j2 = jitter2,
-              pltHeight = 150 + nrow(hk.tab) * 15))
+              pltHeight = 150 + nrow(hk.tab) * 15,
+              jitterHeight = 150 + length(grep("housekeep", ns$dat.list$dict$CodeClass, ignore.case=TRUE)) * 15))
 }
 
 
