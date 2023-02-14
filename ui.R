@@ -11,6 +11,7 @@ source("helpers.R")
 ##Add sticky header on scroll
 #Add something interactive where person can see the files after they are uploaded
 dashboardPage(skin = "blue",
+              title = "The NanoTube",
               
               header,  # defined in 'helpers.R'
               
@@ -43,11 +44,8 @@ dashboardPage(skin = "blue",
                                     
                                     p("NanoTube performs data processing, quality control, normalization and analysis on NanoString gene expression data."),
                                     b("Click on the Setup tab to get started."),
-                                    p("The downloadable version of this R-Shiny application can be found on GitHub, and also includes example data sets:"),
-                                    a(href = 'https://github.com/calebclass/Shiny-NanoTube', 'Shiny-NanoTube on GitHub'),
+                                    HTML("<p>The downloadable version of this R-Shiny application can be <a href = 'https://github.com/calebclass/Shiny-NanoTube'>found on GitHub</a>, along with example data sets.</p>"),
                                     
-                                    br(),
-                                    br(),
                                     a(href='http://www.bioconductor.org/packages/release/bioc/html/NanoTube.html', b("Check out the NanoTube package on Bioconductor!")),
                                     p("This R package provides additional normalization and analysis options for NanoString nCounter data."),
                                     
@@ -56,15 +54,15 @@ dashboardPage(skin = "blue",
                                     h3("Data Processing"),
                                     p("nCounter data are input as raw RCC files or CSV files (which possibly came from the RCC Collector tool). An additional sample information table is then loaded to allow comparisons between groups."),
                                     h3("Normalization"),
-                                    p("This application performs manufacturer-recommended normalization steps, including positive and housekeeping normalization, as well as the removal of target genes found to have expression levels below 'background' (estimated from the negative control gene expression)."),
+                                    p("This application performs manufacturer-recommended normalization steps, including positive and housekeeping normalization, as well as the removal of target genes found to have expression levels below 'background' (estimated from the negative control gene expression). Alternatively, the RUVg normalization method has been demonstrated to perform well using housekeeping genes."),
                                     h3("Analysis"),
-                                    p("nCounter data are input as raw RCC files or CSV files (possibly from the RCC Collector tool), which can then be combined with a sample information table and saved as an ExpressionSet."),
+                                    p("Differential expression analysis is conducted using Limma (the NanoTube R library also allows DE analysis using NanoStringDiff). Gene set analysis is conducted from the ranked DE results, using the fgsea package."),
                                     h3("Visualization"),
-                                    p("nCounter data are input as raw RCC files or CSV files (possibly from the RCC Collector tool), which can then be combined with a sample information table and saved as an ExpressionSet."),
+                                    p("This application provides basic visualizations for quality control, including observed/expected plots for positive control reporters, boxplots to assess normalization performance, and PCA plots. Volcano plots and heatmaps are provided to interactively explore the results of differential expression and gene set analysis."),
                                     
                                     h2("Citation"),
-                                    p("If you use the NanoTube in your work, please cite our conference paper:"),
-                                    b("Class CA, Bristow CA, Do K-A (2021). Easy NanoString Gene Expression Analysis with the Nanotube. The FASEB Journal 36(S1)."),
+                                    p("If you use the NanoTube in your work, please cite our paper:"),
+                                    HTML("<p><b>Class CA, Lukan CJ, Bristow CA, Do K-A (2023). Easy NanoString nCounter data analysis with the Nanotube. <i>Bioinformatics</i> 39(1). DOI: <a href='https://doi.org/10.1093/bioinformatics/btac762'>10.1093/bioinformatics/btac762</a></b></p>"),
                                     
                                     h2("License"),
                                     p("The NanoTube and its Shiny app are provided with the GNU General Public License (GPL-3), and without warranty."),
