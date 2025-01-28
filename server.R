@@ -17,9 +17,50 @@ shinyServer(
     
     output$basePhen_input <- renderUI({
       req(sample_info(), input$phenCol)
-      selectInput(inputId = "basePhen",
-                  label = "Base Group",
-                  choices = unique(sample_info()[,input$phenCol]))
+
+    if (!input$phenModel) {
+        selectInput(inputId = "basePhen",
+                    label = "Base Group",
+                    choices = unique(sample_info()[[input$phenCol]]))
+      }
+    })
+    
+    output$twoFactor_input <- renderUI({
+      req(sample_info(), input$phenCol, input$basePhen)
+      if (!input$phenModel) {
+        checkboxInput("twoFactor",
+                      label = "Advanced: Two-factor design",
+                      value = FALSE)
+      }
+    })
+    
+    output$timeCol_input <- renderUI({
+      req(sample_info())
+      if (!input$phenModel & input$twoFactor) {
+        allColnames <- colnames(sample_info())
+        
+        selectInput(inputId = "timeCol",
+                    label = "Time Column",
+                    choices = allColnames[allColnames != input$phenCol])
+      }
+    })
+    
+    output$baseTime_input <- renderUI({
+      req(sample_info(), input$phenCol, input$timeCol)
+      if (!input$phenModel & input$twoFactor) {
+        selectInput(inputId = "baseTime",
+                    label = "Base Time",
+                    choices = unique(sample_info()[[input$timeCol]]))
+      }
+    })
+    
+
+    phenCol <- reactive({
+      if (input$phenModel) {
+        NULL
+      } else {
+        input$phenCol
+      }
     })
     
     merged_info <- eventReactive(input$check, {

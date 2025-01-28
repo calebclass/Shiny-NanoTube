@@ -120,6 +120,27 @@ dashboardPage(skin = "blue",
                                            
                                          ),
                                          
+                                         fluidRow(
+                                           column(6,
+                                                  uiOutput("twoFactor_input"))
+                                           
+                                           
+                                         ),
+                                         
+                                         fluidRow(
+                                           column(6,
+                                                  uiOutput("timeCol_input"))
+                                           
+                                           
+                                         ),
+                                         
+                                         fluidRow(
+                                           column(6,
+                                                  uiOutput("baseTime_input"))
+                                           
+                                           
+                                         ),
+                                         
                                          fileInput("gsDb",
                                                    label = "Gene set database (Optional)",
                                                    multiple = FALSE),

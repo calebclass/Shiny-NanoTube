@@ -9,6 +9,8 @@ header$children[[2]]$children <- tags$div(
 
 ######################
 
+# Summarize number of targets that pass filtering vs. Negative controls.
+
 summarizeNegQC <- function(ns) {
   negSummary <- data.frame(nms = c("Pass", "Removed"),
                            counts = c(paste0(sum(ns$gene.stats$pass), " Targets"),
@@ -16,6 +18,8 @@ summarizeNegQC <- function(ns) {
   
   return(negSummary)
 }
+
+# Gene-level comparison vs. negative controls.
 
 prepNegGenes <- function(ns) {
   geneTab <- ns$gene.stats
@@ -27,9 +31,11 @@ prepNegGenes <- function(ns) {
                    )))
 }
 
-housekeepingQC <- function(ns) {
-  hk.tab <- data.frame(Sample = names(ns$hk.scalefactors),
-                       `Scale Factor` = round(ns$hk.scalefactors, 2))
+# Boxplots of endogenous and/or housekeeping genes.
+
+housekeepingQC <- function(ns, plotType = "RLE") {
+  hk.tab <- data.frame(Sample = names(ns$dat.list$hk.scalefactors),
+                       `Scale Factor` = round(ns$dat.list$hk.scalefactors, 2))
   
   boxplot.dat <- as.data.frame(log2(ns$exprs.raw+0.5))
   boxplot.dat$CodeClass <- ns$dict.raw$CodeClass
@@ -65,6 +71,7 @@ housekeepingQC <- function(ns) {
               plt2 = b2))
 }
 
+# Interactive principal components analysis
 
 plotPCA <- function(ns) {
   pca.dat <- log2(exprs(ns$dat)[fData(ns$dat)$CodeClass == "Endogenous" &
@@ -98,6 +105,7 @@ plotPCA <- function(ns) {
   return(plt)
 }
 
+# Table of differential expression results.
 
 deRes <- function(ns, summaryQ) {
   diffExpr.tab <- rbind(colSums(ns$deRes$q.value < summaryQ & ns$deRes$coefficients > 0),
@@ -148,6 +156,8 @@ deRes <- function(ns, summaryQ) {
   
 }
 
+
+# Interactive heatmap for gene set results
 
 plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsDir) {
   # Prepare data
@@ -266,6 +276,7 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
   
 }
 
+# Interactive volcano plot.
 
 deVolcanoInt <- function(limmaResults, 
                        plotContrast = NULL, y.var = c("p.value", "q.value")) {
@@ -300,6 +311,8 @@ deVolcanoInt <- function(limmaResults,
   return(plt)
   
 }
+
+# Positive control summary plots.
 
 prepPosOutputs <- function(posQC) {
   posQC$plotly <- ggplotly(posQC$plt,
