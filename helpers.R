@@ -274,7 +274,7 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
   dat.hm <- dat.scaled[genes,]
   
   # Replace any spaces with periods in group names (automatically done by other functions)
-  sample.groups <- gsub(" ", ".", ns$dat$groups)
+  sample.groups <- gsub(" ", ".", ns$dat.main$groups)
   base.group <- gsub(" ", ".", ns$base.group)
   
   title.y <- 1.15

@@ -65,6 +65,15 @@ shinyServer(
       }
     })
     
+    
+    timeCol <- reactive({
+      if (input$twoFactor) {
+        input$timeCol
+      } else {
+        NULL
+      }
+    })
+    
     merged_info <- eventReactive(input$check, {
       req(input$expr, input$phen)
       nanostringData <- processNanostringData(input$expr$datapath,
@@ -113,7 +122,9 @@ shinyServer(
         
         nanostringData <- processNanostringData(input$expr$datapath,
                                                 sampleTab = input$phen$datapath,
-                                                groupCol = phenCol(),
+                                                groupCol = ifelse(input$twoFactor, 
+                                                                  yes = timeCol(),
+                                                                  no = phenCol()),
                                                 normalization = input$normMethod,
                                                 bgType = "t.test", bgPVal = input$bgP,
                                                 housekeeping = hk.genes,
@@ -133,7 +144,9 @@ shinyServer(
         # This will be updated in NanoTube R package
         nanostringDataBG2 <- processNanostringData(input$expr$datapath,
                                                 sampleTab = input$phen$datapath,
-                                                groupCol = phenCol(),
+                                                groupCol = ifelse(input$twoFactor, 
+                                                                  yes = timeCol(),
+                                                                  no = phenCol()),
                                                 bgType = "t.test", bgPVal = input$bgP,
                                                 housekeeping = hk.genes,
                                                 includeQC = FALSE,
@@ -156,6 +169,17 @@ shinyServer(
           base.group <- "Intercept"
           design.mat <- pData(nanostringData)[,2:(ncol(pData(nanostringData))-1)]
           limmaResults <- runLimmaAnalysis(nanostringData, design = design.mat)
+        } else if (input$twoFactor) {
+          base.group <- input$baseTime
+          # If two factor design, datasets will be split based on "Group",
+          # and differential expression analysis will be conducted on "Time".
+          
+          nanostringData_Control <- nanostringData[,pData(nanostringData)[[phenCol()]] == input$basePhen]
+          nanostringData_Main <- nanostringData[,pData(nanostringData)[[phenCol()]] != input$basePhen]
+          
+          limmaResults_Control <- runLimmaAnalysis(nanostringData_Control, groups = NULL, base.group)
+          limmaResults <- runLimmaAnalysis(nanostringData_Main, groups = NULL, base.group)
+          
         } else {
           base.group <- input$basePhen
           limmaResults <- runLimmaAnalysis(nanostringData, groups = NULL, base.group)
@@ -166,6 +190,12 @@ shinyServer(
                    deRes = limmaResults,
                    base.group = base.group,
                    gene.stats = nanostringDataBG2$gene.stats)
+        
+        if (input$twoFactor) {
+          ns$dat.main <- nanostringData_Main
+          ns$dat.control <- nanostringData_Control
+          ns$deRes.control <- limmaResults_Control
+        }
         
         if (!is.null(input$gsDb$datapath)) {
           incProgress(1/6, detail = "Analyzing Gene Sets")
@@ -258,8 +288,10 @@ shinyServer(
     )
     
     ###
-    output$canoPlot <- renderPlotly({req(ns())
-      canoPlot()})
+    output$canoPlot <- renderPlotly({
+      req(ns())
+      canoPlot()
+      })
     ###
     output$NANOdownload <- downloadHandler(
       filename = function() {"nanoTable.csv"},
