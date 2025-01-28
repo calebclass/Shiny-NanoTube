@@ -135,7 +135,7 @@ plotPCA <- function(ns) {
   pca.dat <- log2(exprs(ns$dat)[grepl("endogenous", fData(ns$dat)$CodeClass, ignore.case=TRUE) &
                                  rowSums(exprs(ns$dat) == 0) == 0,]+0.5)
   
-  gp <- pData(ns$deRes$eset)$group
+  gp <- pData(ns$dat)$groups
   
   pca <- prcomp(t(pca.dat),
                 center = TRUE, scale = TRUE)
