@@ -10,9 +10,11 @@ shinyServer(
     
     output$phenCol_input <- renderUI({
       req(sample_info())
-      selectInput(inputId = "phenCol",
-                  label = "Group Column",
-                  choices = colnames(sample_info()))
+      if (!input$phenModel) {
+        selectInput(inputId = "phenCol",
+                    label = "Group Column",
+                    choices = colnames(sample_info()))
+      }
     })
     
     output$basePhen_input <- renderUI({
@@ -67,7 +69,7 @@ shinyServer(
       req(input$expr, input$phen)
       nanostringData <- processNanostringData(input$expr$datapath,
                                               sampleTab = input$phen$datapath,
-                                              groupCol = input$phenCol,
+                                              groupCol = phenCol(),
                                               normalization = "none",
                                               includeQC = FALSE,
                                               output.format = "list")
@@ -76,8 +78,14 @@ shinyServer(
     output$merged_info <- renderDataTable({
       req(merged_info())
       
-      checkTable <- datatable(cbind(data.frame(Filename = colnames(merged_info()$exprs), 
-                                     Group = merged_info()$groups),
+      if (input$phenModel) {
+        tab1 <- data.frame(Filename = colnames(merged_info()$exprs))
+      } else {
+        tab1 <- data.frame(Filename = colnames(merged_info()$exprs), 
+                           Group = merged_info()$groups)
+      }
+      
+      checkTable <- datatable(cbind(tab1,
                           merged_info()$samples),
                           rownames = FALSE,
                           options = list(
@@ -90,12 +98,6 @@ shinyServer(
                             pageLength = 10
                           ))  # thanks to https://stackoverflow.com/questions/57946206/how-to-resize-a-datatable-in-order-to-fit-it-in-a-box-for-shinydashboard
     })
-    
-#    observeEvent(input$run, {
-#      updateNavbarPage(session, "master",
-#                       selected = "QC Results"
-#      )
-#    })
     
     ns <- eventReactive(input$run, {
       
@@ -111,9 +113,12 @@ shinyServer(
         
         nanostringData <- processNanostringData(input$expr$datapath,
                                                 sampleTab = input$phen$datapath,
-                                                groupCol = input$phenCol,
+                                                groupCol = phenCol(),
+                                                normalization = input$normMethod,
                                                 bgType = "t.test", bgPVal = input$bgP,
                                                 housekeeping = hk.genes,
+                                                n.unwanted = input$nUnwanted,
+                                                RUVg.drop = input$RUVgDrop,
                                                 includeQC = FALSE)
         
         incProgress(1/4, detail = "Normalizing Data")
@@ -128,22 +133,13 @@ shinyServer(
         # This will be updated in NanoTube R package
         nanostringDataBG2 <- processNanostringData(input$expr$datapath,
                                                 sampleTab = input$phen$datapath,
-                                                groupCol = input$phenCol,
+                                                groupCol = phenCol(),
                                                 bgType = "t.test", bgPVal = input$bgP,
                                                 housekeeping = hk.genes,
                                                 includeQC = FALSE,
                                                 output.format = "list")
         
-        
-        #      file_input <- input$expr$datapath
-        #      file.extension <- substr(file_input[1], 
-        #                               (nchar(file_input[1])-3), nchar(file_input[1]))
-        #      if(file.extension %in% c(".zip",".ZIP")){
-        #        file_input <- unzip(file_input)
-        #        file_input <-read_merge_rcc(file_input)
-        #        nanoTableData <- file_input
-        #        output$nanoTable <- renderTable(file_input)
-        #      }
+
         
         colnames(nanostringData) <- 
           colnames(nanostringDataBG$exprs.raw) <-
@@ -153,21 +149,17 @@ shinyServer(
           rownames(nanostringDataBG$bg.stats) <-
           gsub(".*\\/|\\.RCC", "", colnames(nanostringData))
         
-        #      if (is.null(input$phen$datapath)) {
-        #        groups <- gsub("_.*", "", colnames(nanostringData))
-        #      } else {
-        #        groups <- as.character(read.table(file = input$phen$datapath, sep = "", as.is = TRUE))
-        #      }
-        
-        #      if (input$basePhen == "") {
-        #        base.group <- groups[1]
-        #      } else {
-        base.group <- input$basePhen
-        #      }
-        
         incProgress(1/4, detail = "Analyzing Diff. Expr.")
         
-        limmaResults <- runLimmaAnalysis(nanostringData, NULL, base.group)
+        if (input$phenModel) {
+          # Design matrix has had 2 extra columns added -- these are removed here.
+          base.group <- "Intercept"
+          design.mat <- pData(nanostringData)[,2:(ncol(pData(nanostringData))-1)]
+          limmaResults <- runLimmaAnalysis(nanostringData, design = design.mat)
+        } else {
+          base.group <- input$basePhen
+          limmaResults <- runLimmaAnalysis(nanostringData, groups = NULL, base.group)
+        }
         
         ns <- list(dat = nanostringData,
                    dat.list = nanostringDataBG,
@@ -178,6 +170,10 @@ shinyServer(
         if (!is.null(input$gsDb$datapath)) {
           incProgress(1/6, detail = "Analyzing Gene Sets")
           ns$gsRes <- limmaToFGSEA(limmaResults, input$gsDb$datapath,
+                                   min.set = input$minSize)
+        } else if (input$gsReactome) {
+          incProgress(1/6, detail = "Analyzing Gene Sets")
+          ns$gsRes <- limmaToFGSEA(limmaResults, "data/ReactomePathways.gmt",
                                    min.set = input$minSize)
         }
         
@@ -193,7 +189,14 @@ shinyServer(
     
     posQC <- reactive({ prepPosOutputs(positiveQC(ns()$dat.list)) })
     negQC <- reactive({ negativeQC(ns()$dat.list, interactive.plot = FALSE) })
-    hkQC <- reactive({ housekeepingQC(ns()$dat.list) })
+    hkQC <- reactive({ housekeepingQC(ns(), plotType = input$boxplotType) })
+    boxHeight <- function() {
+      hkQC()$pltHeight
+    }
+    jitterHeight <- function() {
+      hkQC()$jitterHeight
+    }
+    
     pcaPlot <- reactive({ plotPCA(ns()) })
     deResults <- reactive({ deRes(ns(), input$summaryQ) })
     ####
@@ -206,8 +209,6 @@ shinyServer(
     
     ###
     
-    #####
-
     output$posTab <- renderDataTable({ posQC()$DT })
     output$posPlot <- renderPlotly({ posQC()$plotly })
     output$negTab <- renderDataTable({datatable(negQC()$tab, rownames = TRUE,
@@ -220,8 +221,14 @@ shinyServer(
     output$negPlot <- renderPlotly({ggplotly(negQC()$plt,
                                              height = 120 + nrow(negQC()$tab) * 15 )})
     output$hkTab <- renderDataTable({datatable(hkQC()$tab, rownames = FALSE) })
-    output$hkPlot1 <- renderPlotly({hkQC()$plt1})
-    output$hkPlot2 <- renderPlotly({hkQC()$plt2})
+    output$normPlot1 <- renderPlot({hkQC()$plt1},
+                                 height = boxHeight)
+    output$normPlot2 <- renderPlot({hkQC()$plt2},
+                                 height = boxHeight)
+    output$hkPlot1 <- renderPlot({hkQC()$j1},
+                                   height = jitterHeight)
+    output$hkPlot2 <- renderPlot({hkQC()$j2},
+                                   height = jitterHeight)
     output$pcaPlot <- renderPlotly({
       req(ns())
       pcaPlot()})
@@ -292,7 +299,7 @@ shinyServer(
         #    ),
         #    column(12,
         numericInput("gsQthresh", label = "q-value threshold:", value = 1, step = 0.05),
-        numericInput("gsClust", label = "Cluster to plot:", value = 1, step = 1)
+        numericInput("gsClust", label = "Cluster for heatmap:", value = 1, step = 1)
         #    )
       )
       #)
@@ -343,39 +350,8 @@ shinyServer(
     })
     ############
     
-    
-    
-    
-    
-    
-    hide(id="jobSetup1")
-    hide(id="jobSetup2")
-    hide(id="jobSetup3")
-    hide(id="jobSetup4")
-    
-    hide(id = "nanoStringData")
-    hide(id ="sampleGroupClassifiers")
-    hide(id = "geneSetData")
-    
-    hide(id="qResults1")
-    hide(id="aResults1")
-    
-    observeEvent(input$setup, {
-      toggle(id = "jobSetup1")
-      toggle(id =  "jobSetup2")
-      toggle(id =  "jobSetup3")
-      toggle(id =  "jobSetup4")
-      toggle(id = "nanoStringData")
-      toggle(id = "sampleGroupClassifiers")
-      toggle(id = "geneSetData")
-      
-    })
-    observeEvent(input$qcResults, {
-      toggle(id = "qResults1")
-    })
-    observeEvent(input$anaResults, {
-      toggle(id = "aResults1")
-    })
+
+  
     
   }
 )

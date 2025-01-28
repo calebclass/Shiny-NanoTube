@@ -11,6 +11,7 @@ source("helpers.R")
 ##Add sticky header on scroll
 #Add something interactive where person can see the files after they are uploaded
 dashboardPage(skin = "blue",
+              title = "The NanoTube",
               
               header,  # defined in 'helpers.R'
               
@@ -43,9 +44,8 @@ dashboardPage(skin = "blue",
                                     
                                     p("NanoTube performs data processing, quality control, normalization and analysis on NanoString gene expression data."),
                                     b("Click on the Setup tab to get started."),
+                                    HTML("<p>The downloadable version of this R-Shiny application can be <a href = 'https://github.com/calebclass/Shiny-NanoTube'>found on GitHub</a>, along with example data sets.</p>"),
                                     
-                                    br(),
-                                    br(),
                                     a(href='http://www.bioconductor.org/packages/release/bioc/html/NanoTube.html', b("Check out the NanoTube package on Bioconductor!")),
                                     p("This R package provides additional normalization and analysis options for NanoString nCounter data."),
                                     
@@ -54,15 +54,15 @@ dashboardPage(skin = "blue",
                                     h3("Data Processing"),
                                     p("nCounter data are input as raw RCC files or CSV files (which possibly came from the RCC Collector tool). An additional sample information table is then loaded to allow comparisons between groups."),
                                     h3("Normalization"),
-                                    p("This application performs manufacturer-recommended normalization steps, including positive and housekeeping normalization, as well as the removal of target genes found to have expression levels below 'background' (estimated from the negative control gene expression)."),
+                                    p("This application performs manufacturer-recommended normalization steps, including positive and housekeeping normalization, as well as the removal of target genes found to have expression levels below 'background' (estimated from the negative control gene expression). Alternatively, the RUVg normalization method has been demonstrated to perform well using housekeeping genes."),
                                     h3("Analysis"),
-                                    p("nCounter data are input as raw RCC files or CSV files (possibly from the RCC Collector tool), which can then be combined with a sample information table and saved as an ExpressionSet."),
+                                    p("Differential expression analysis is conducted using Limma (the NanoTube R library also allows DE analysis using NanoStringDiff). Gene set analysis is conducted from the ranked DE results, using the fgsea package."),
                                     h3("Visualization"),
-                                    p("nCounter data are input as raw RCC files or CSV files (possibly from the RCC Collector tool), which can then be combined with a sample information table and saved as an ExpressionSet."),
+                                    p("This application provides basic visualizations for quality control, including observed/expected plots for positive control reporters, boxplots to assess normalization performance, and PCA plots. Volcano plots and heatmaps are provided to interactively explore the results of differential expression and gene set analysis."),
                                     
                                     h2("Citation"),
-                                    p("If you use the NanoTube in your work, please cite our conference paper:"),
-                                    b("Class CA, Bristow CA, Do K-A (2021). Easy NanoString Gene Expression Analysis with the Nanotube. The FASEB Journal 36(S1)."),
+                                    p("If you use the NanoTube in your work, please cite our paper:"),
+                                    HTML("<p><b>Class CA, Lukan CJ, Bristow CA, Do K-A (2023). Easy NanoString nCounter data analysis with the Nanotube. <i>Bioinformatics</i> 39(1). DOI: <a href='https://doi.org/10.1093/bioinformatics/btac762'>10.1093/bioinformatics/btac762</a></b></p>"),
                                     
                                     h2("License"),
                                     p("The NanoTube and its Shiny app are provided with the GNU General Public License (GPL-3), and without warranty."),
@@ -103,8 +103,14 @@ dashboardPage(skin = "blue",
                                          bsTooltip("phen",
                                                    "This should be a CSV file, containing sample information.",
                                                    placement = "bottom", trigger = "hover", options = NULL),
-                                         
-                                         
+                                         div(style = "margin-top: -20px"),
+                                         checkboxInput("phenModel",
+                                                       label = "Advanced: 'Sample info table' is a design matrix",
+                                                       value = FALSE),
+                                         bsTooltip("phenModel",
+                                                   "This is an option for advanced users. Please see Help page for more information.",
+                                                   placement = "bottom", trigger = "hover", options = NULL),
+                                    
                                          
                                          # Read columns in Sample info table, asks user which column corresponds to "Group"
                                          fluidRow(
@@ -148,13 +154,21 @@ dashboardPage(skin = "blue",
                                          bsTooltip("gsDb",
                                                    "A gene set database file, either in .gmt format or an .rds file containing an R-format list of gene sets",
                                                    placement = "bottom", trigger = "hover", options = NULL),
+                                         div(style = "margin-top: -20px"),
+                                         checkboxInput("gsReactome",
+                                                       label = "Use the REACTOME database for GSEA",
+                                                       value = FALSE),
+                                         bsTooltip("gsReactome",
+                                                   "The REACTOME database can be used instead of loading in a .gmt database. Reference: M Gillespie et. al. (2022). The reactome pathway knowledgebase 2022.",
+                                                   placement = "bottom", trigger = "hover", options = NULL),
+                                         
+                                         br(), 
                                          
                                          actionButton("check",
                                                       label = "Check Samples"),
                                          
                                          actionButton("run",
                                                       label = "Analyze Data"),
-                                         #submitButton("Analyze Data"),
                                          
                                          br(),
                                          verbatimTextOutput("numSamps"),
@@ -166,6 +180,11 @@ dashboardPage(skin = "blue",
                                        collapsible = TRUE, collapsed = TRUE,
                                        
                                        h4("Normalization Options", id = "gseaTxt"),
+                                       
+                                       selectInput("normMethod",
+                                                   label = "Normalization Method",
+                                                   choices = c("nSolver", "RUVg"),
+                                                   selected = "nSolver"),
                                        
                                        textInput("hk",
                                                  label = "Housekeeping Genes",
@@ -180,6 +199,16 @@ dashboardPage(skin = "blue",
                                                     max = 2),
                                        bsTooltip("bgP",
                                                  "Expression threshold (vs. negative control genes) for inclusion, in the form of a p-value from a 2-sample t test (see Help). To include all genes in analysis, set to 2."),
+                                       
+                                       numericInput("nUnwanted",
+                                                    label = "Number of Unwanted Factors (RUV normalization only)",
+                                                    value = 1,
+                                                    min = 1),
+                                       
+                                       numericInput("RUVgDrop",
+                                                    label = "Number of Singular Values to drop (RUVg normalization only)",
+                                                    value = 0,
+                                                    min = 0),
                                        
                                        h4("Gene Set Analysis Options", id = "gseaTxt"),
                                        
@@ -208,12 +237,14 @@ dashboardPage(skin = "blue",
                                      tabPanel("Positive Controls",
                                               box(
                                                 column(width = 12, plotlyOutput("posPlot", width = "100%", height = "auto")),
-                                                width = 8
+                                                width = 8,
+                                                title = "Observed-Expected Plots"
                                               ),
                                               
                                               box(
                                                 dataTableOutput("posTab"),
-                                                width = 4
+                                                width = 4,
+                                                title = "Sample Size Factors (Positive Controls)"
                                               )),
                                      
                                      tabPanel("Negative Controls",
@@ -247,19 +278,50 @@ dashboardPage(skin = "blue",
                                                 
                                               )),
                                      
-                                     tabPanel("Housekeeping",
-                                              box(
-                                                plotlyOutput("hkPlot1", width = "100%", height = "auto"),
-                                                br(),br(),
-                                                plotlyOutput("hkPlot2", width = "100%", height = "auto"),
-                                                width = 8
+                                     tabPanel("Housekeeping Genes",
+                                              column(width = 8,
+                                                     box(
+                                                       h3("Raw Data"),
+                                                       plotOutput("hkPlot1", width = "100%", height = "auto"),
+                                                       title = "Housekeeping Assessment",
+                                                       width = NULL
+                                                     ),
+                                                     box(
+                                                       h3("Normalized Data"),
+                                                       plotOutput("hkPlot2", width = "100%", height = "auto"),
+                                                       width = NULL
+                                                     )
                                               ),
                                               
-                                              box(
-                                                dataTableOutput("hkTab"),
-                                                width = 4
-                                              )))
-                  ),
+                                              column(width = 4,
+                                                     box(
+                                                       dataTableOutput("hkTab"),
+                                                       title = "Sample Size Factors (Housekeeping Genes)",
+                                                       width = NULL
+                                                     ))
+                                              ),
+                                     
+                                     tabPanel("Normalization Assessment",
+                                              column(width = 8,
+                                                     box(
+                                                       column(width = 8,
+                                                              selectInput("boxplotType", label = "Boxplot Type:",
+                                                                          choices = c("RLE", "Log2(Expression)"))),
+                                                       br(), br(), br(),
+                                                       h3("Raw Data"),
+                                                       plotOutput("normPlot1", width = "100%", height = "auto"),
+                                                       title = "Normalization Assessment",
+                                                       width = NULL
+                                                     ),
+                                                     box(
+                                                       h3("Normalized Data"),
+                                                       plotOutput("normPlot2", width = "100%", height = "auto"),
+                                                       width = NULL
+                                                     )
+                                              )
+                                              
+                                     )
+                  )),
                   
                   tabItem(tabName = "AnalysisRes",
                           fluidRow(
@@ -281,8 +343,8 @@ dashboardPage(skin = "blue",
                             ),
                             column(width = 7,
                                    box(title = "Summary", width = NULL,
-                                       column(width = 4, 
-                                              numericInput('summaryQ', 'q-val cutoff', value = 0.05, min = 0, max = 1)),
+                                        
+                                       numericInput('summaryQ', 'q-val cutoff', value = 0.05, min = 0, max = 1),
                                        tableOutput("deCounts")),
                                    
                                    box(
