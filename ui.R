@@ -335,9 +335,10 @@ dashboardPage(skin = "blue",
                                    box(
                                      title = "Volcano Plot", width = NULL,
                                      
-                                     uiOutput("volUI"),
+                                     uiOutput("volUI"), # which comparison to show
                                      numericInput('logfc_cutoff','log2(FC) cutoff', value = 0, min = 0, max = 10),
-                                     numericInput('pval_cutoff','p-val cutoff', value = 0.05, min = 0, max = 1),
+                                     selectInput('signif_type', 'Significance type', choices = c("p.value", "q.value")),
+                                     numericInput('pval_cutoff','p/q-val cutoff', value = 0.05, min = 0, max = 1),
                                      
                                      plotlyOutput("canoPlot"),
                                      

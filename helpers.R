@@ -174,9 +174,10 @@ plotPCA <- function(ns) {
 
 # Table of differential expression results.
 
-deRes <- function(ns, pval_cutoff, logfc_cutoff) {
-  diffExpr.tab <- rbind(colSums(ns$deRes$q.value < pval_cutoff & ns$deRes$coefficients > 0),
-                        colSums(ns$deRes$q.value < pval_cutoff & ns$deRes$coefficients < 0))
+deRes <- function(ns, signif_type = c("p.value", "q.value"), 
+                  pval_cutoff, logfc_cutoff) {
+  diffExpr.tab <- rbind(colSums(ns$deRes[[signif_type[1]]] < pval_cutoff & ns$deRes$coefficients > logfc_cutoff),
+                        colSums(ns$deRes[[signif_type[1]]] < pval_cutoff & ns$deRes$coefficients < -logfc_cutoff))
   diffExpr.tab <- sapply(as.data.frame(diffExpr.tab[,!(colnames(diffExpr.tab) %in% c("Intercept", "(Intercept)"))]),
                          as, "integer")
   
@@ -371,7 +372,10 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
 # Interactive volcano plot.
 
 deVolcanoInt <- function(limmaResults, 
-                       plotContrast = NULL, y.var = c("p.value", "q.value")) {
+                       plotContrast = NULL, 
+                       y.var = c("p.value", "q.value"),
+                       pval_cutoff = 0.05,
+                       logfc_cutoff = 0) {
   
   # Bind local variables
   log2FC <- log10p <- NULL
@@ -394,6 +398,9 @@ deVolcanoInt <- function(limmaResults,
   
   plt <- ggplot(df, aes(x = log2FC, y = log10p, label = name)) +
     geom_point() +
+    geom_hline(yintercept =  -log10(pval_cutoff), linetype =  "dashed", colour = 'darkred') +
+    geom_vline(xintercept = logfc_cutoff, linetype = "dashed", colour = "darkred") +
+    geom_vline(xintercept = -logfc_cutoff, linetype = "dashed", colour = "darkred") +
     xlab("log2(Fold Change)") +
     ylab(paste0("-log10(", substr(y.var[1], 1, 1), ")")) +
     theme_bw()
