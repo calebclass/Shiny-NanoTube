@@ -174,9 +174,9 @@ plotPCA <- function(ns) {
 
 # Table of differential expression results.
 
-deRes <- function(ns, summaryQ) {
-  diffExpr.tab <- rbind(colSums(ns$deRes$q.value < summaryQ & ns$deRes$coefficients > 0),
-                        colSums(ns$deRes$q.value < summaryQ & ns$deRes$coefficients < 0))
+deRes <- function(ns, pval_cutoff, logfc_cutoff) {
+  diffExpr.tab <- rbind(colSums(ns$deRes$q.value < pval_cutoff & ns$deRes$coefficients > 0),
+                        colSums(ns$deRes$q.value < pval_cutoff & ns$deRes$coefficients < 0))
   diffExpr.tab <- sapply(as.data.frame(diffExpr.tab[,!(colnames(diffExpr.tab) %in% c("Intercept", "(Intercept)"))]),
                          as, "integer")
   

@@ -228,14 +228,14 @@ shinyServer(
     }
     
     pcaPlot <- reactive({ plotPCA(ns()) })
-    deResults <- reactive({ deRes(ns(), input$summaryQ) })
+    deResults <- reactive({ deRes(ns(), input$pval_cutoff, input$logfc_cutoff) })
     ####
     
     canoPlot <- reactive({deVolcanoInt(limmaResults = ns()$deRes,
                                        plotContrast = input$volComp) +
-        geom_hline(yintercept =  -log10(input$volcanoHorLineInput), linetype =  "dashed", colour = 'darkred') +
-        geom_vline(xintercept = input$volcanoVertLineInput, linetype = "dashed", colour = "darkred") +
-        geom_vline(xintercept = -input$volcanoVertLineInput, linetype = "dashed", colour = "darkred")})
+        geom_hline(yintercept =  -log10(input$pval_cutoff), linetype =  "dashed", colour = 'darkred') +
+        geom_vline(xintercept = input$logfc_cutoff, linetype = "dashed", colour = "darkred") +
+        geom_vline(xintercept = -input$logfc_cutoff, linetype = "dashed", colour = "darkred")})
     
     ###
     

@@ -336,25 +336,23 @@ dashboardPage(skin = "blue",
                                      title = "Volcano Plot", width = NULL,
                                      
                                      uiOutput("volUI"),
-                                     numericInput('volcanoVertLineInput','log2(FC) cutoff', value = 0, min = 0, max = 10),
-                                     numericInput('volcanoHorLineInput','p-val cutoff', value = 0.05, min = 0, max = 1),
+                                     numericInput('logfc_cutoff','log2(FC) cutoff', value = 0, min = 0, max = 10),
+                                     numericInput('pval_cutoff','p-val cutoff', value = 0.05, min = 0, max = 1),
                                      
-                                     plotlyOutput("canoPlot")
-                                   )
-                            ),
+                                     plotlyOutput("canoPlot"),
+                                     
+                                     tableOutput("deCounts"))
+                                   ),
                             column(width = 7,
-                                   box(title = "Summary", width = NULL,
-                                        
-                                       numericInput('summaryQ', 'q-val cutoff', value = 0.05, min = 0, max = 1),
-                                       tableOutput("deCounts")),
                                    
                                    box(
                                      title = "Full Results", width = NULL,
                                      
                                      DTOutput("deTab"),
                                      downloadButton("DEdownload","Download Table")
-                                   ))
-                          )
+                                   )
+                            ))
+                          
                           
                           ####
                           #tabPanel("Nanostring data table",
