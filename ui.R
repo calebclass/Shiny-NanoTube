@@ -320,17 +320,18 @@ dashboardPage(skin = "blue",
                                                      )
                                               )
                                               
-                                     )
+                                     ),
+                                     tabPanel("PCA",
+                                              column(width = 5,
+                                                     box(
+                                                       title = "PCA", width = NULL, 
+                                                       plotlyOutput("pcaPlot")
+                                                     )))
                   )),
                   
                   tabItem(tabName = "AnalysisRes",
                           fluidRow(
                             column(width = 5,
-                                   box(
-                                     title = "PCA", width = NULL, 
-                                     plotlyOutput("pcaPlot")
-                                   ),
-                                   
                                    box(
                                      title = "Volcano Plot", width = NULL,
                                      
