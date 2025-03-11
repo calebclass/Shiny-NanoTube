@@ -175,7 +175,9 @@ plotPCA <- function(ns) {
 # Table of differential expression results.
 
 deRes <- function(ns, signif_type = c("p.value", "q.value"), 
-                  pval_cutoff, logfc_cutoff) {
+                  pval_cutoff, logfc_cutoff, twoFactor = FALSE) {
+  
+  # Currently this table only looks at the "treatment" comparisons for two-factor.
   diffExpr.tab <- rbind(colSums(ns$deRes[[signif_type[1]]] < pval_cutoff & ns$deRes$coefficients > logfc_cutoff),
                         colSums(ns$deRes[[signif_type[1]]] < pval_cutoff & ns$deRes$coefficients < -logfc_cutoff))
   diffExpr.tab <- sapply(as.data.frame(diffExpr.tab[,!(colnames(diffExpr.tab) %in% c("Intercept", "(Intercept)"))]),
@@ -186,7 +188,7 @@ deRes <- function(ns, signif_type = c("p.value", "q.value"),
     colnames(diffExpr.tab) <- ""
     gp <- colnames(ns$deRes$q.value)[!(colnames(ns$deRes$q.value) %in% c("Intercept", "(Intercept)"))]
     rownames(diffExpr.tab) <- c(paste0("logFC > 0 for ", gp),
-                                 paste0("logFC < 0 for ", gp))
+                                paste0("logFC < 0 for ", gp))
   } else {
     rownames(diffExpr.tab) <- c("logFC > 0", 
                                 "logFC < 0")
@@ -197,7 +199,7 @@ deRes <- function(ns, signif_type = c("p.value", "q.value"),
   #             col.names = ifelse(ncol(diffExpr.tab)==2, yes = "", no = NA)) %>%
   #  kableExtra::kable_styling(full_width = F)
   
-
+  
   diffExpr.full <- as.data.frame(makeDiffExprFile(ns$deRes, returns = "stats"))
   
   brks.fc <- seq(-2, 2, 4/100)
@@ -208,18 +210,72 @@ deRes <- function(ns, signif_type = c("p.value", "q.value"),
                     c(rep(255, times = ln/2), round(seq(255, 40, length.out = ln/2), 0)), ")")
   brks.qv <- seq(0, 0.1, 0.1/100)
   cols.qv <- paste0("rgb(255,", round(seq(40, 255, length.out = length(brks.qv) + 1), 0), ",255)")
-  dtable <- datatable(diffExpr.full, 
-                      options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")),
-                                     autoWidth = TRUE, scrollX = TRUE,
-                                     #columnDefs = list(list(width = "125px", targets = "_all")),
-                                     dom = 'tpB',
-                                     lengthMenu = list(c(5, 15,-1), c('5', '15', 'All')),
-                                     pageLength = 10)) %>%
-    formatStyle(names(diffExpr.full)[substr(names(diffExpr.full), 1, 6) == "Log2FC"], 
-                backgroundColor = styleInterval(brks.fc, cols.fc)) %>%
-    formatStyle(names(diffExpr.full)[substr(names(diffExpr.full), 1, 5) == "q-val"], 
-                backgroundColor = styleInterval(brks.qv, cols.qv))
 
+  if (twoFactor) {
+    diffExpr.control <- as.data.frame(makeDiffExprFile(ns$deRes.control, returns = "stats"))
+    colnames(diffExpr.control) <- sub("\\(", "(Control.", colnames(diffExpr.control))
+    
+    # Label genes uniquely differentially expressed in Treatment. 
+    # Either not significantly differentially expressed in control, or 
+    # differentially expressed in opposite direction.
+    diffExpr.unique <- as.data.frame(matrix(NA, nrow = nrow(diffExpr.full), ncol = ncol(diffExpr.full) / 4,
+                                                  dimnames = list(rownames(diffExpr.full), 
+                                                                  colnames(diffExpr.full)[seq(from=1, to=ncol(diffExpr.full)-3, by = 4)])))
+    colnames(diffExpr.unique) <- sub("Log2FC", "Unique", colnames(diffExpr.unique))
+    
+    for (j in 1:ncol(diffExpr.unique)) {
+      signif_column <- ifelse(signif_type == "p.value", yes = 1, no = 0)
+      
+      diffExpr.unique[,j] <- abs(diffExpr.full[,(4*j-3)]) > logfc_cutoff &
+        diffExpr.full[,(4*j-signif_column)] < pval_cutoff &
+        (abs(diffExpr.control[,(4*j-3)]) <= logfc_cutoff |
+           diffExpr.control[,(4*j-signif_column)] >= pval_cutoff |
+           diffExpr.control[,(4*j-3)] * diffExpr.full[,(4*j-3)] < 0)
+    }
+    
+    colnames(diffExpr.full) <- sub("\\(", "(Treated.", colnames(diffExpr.full))
+    
+    
+    # Combine to one table
+    diffExpr.combined <- as.data.frame(matrix(nrow=nrow(diffExpr.unique),
+                                              ncol=0))
+    
+    for (j in 1:ncol(diffExpr.unique)) {
+      diffExpr.combined <- cbind(diffExpr.combined,
+                                 diffExpr.unique[,j],
+                                 diffExpr.full[,(4*j-3):(4*j)],
+                                 diffExpr.control[,(4*j-3):(4*j)])
+      colnames(diffExpr.combined)[9*j-8] <- colnames(diffExpr.unique)[j]
+    }
+  
+    dtable <- datatable(diffExpr.combined, 
+                        options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")),
+                                       autoWidth = TRUE, scrollX = TRUE,
+                                       #columnDefs = list(list(width = "125px", targets = "_all")),
+                                       dom = 'tpB',
+                                       lengthMenu = list(c(5, 15,-1), c('5', '15', 'All')),
+                                       pageLength = 10)) %>%
+      formatStyle(names(diffExpr.combined)[substr(names(diffExpr.combined), 1, 6) == "Log2FC"], 
+                  backgroundColor = styleInterval(brks.fc, cols.fc)) %>%
+      formatStyle(names(diffExpr.combined)[substr(names(diffExpr.combined), 1, 5) == "q-val"], 
+                  backgroundColor = styleInterval(brks.qv, cols.qv))
+    
+  } else {
+    
+    dtable <- datatable(diffExpr.full, 
+                        options = list(columnDefs = list(list(className = 'dt-center', targets = "_all")),
+                                       autoWidth = TRUE, scrollX = TRUE,
+                                       #columnDefs = list(list(width = "125px", targets = "_all")),
+                                       dom = 'tpB',
+                                       lengthMenu = list(c(5, 15,-1), c('5', '15', 'All')),
+                                       pageLength = 10)) %>%
+      formatStyle(names(diffExpr.full)[substr(names(diffExpr.full), 1, 6) == "Log2FC"], 
+                  backgroundColor = styleInterval(brks.fc, cols.fc)) %>%
+      formatStyle(names(diffExpr.full)[substr(names(diffExpr.full), 1, 5) == "q-val"], 
+                  backgroundColor = styleInterval(brks.qv, cols.qv))
+    
+  }
+  
   return(list(summary = diffExpr.tab,
               de = dtable))
   
@@ -371,11 +427,13 @@ plotlyHeatmap <- function(ns, groupedGenesets, leadingEdge, gsClust, gsComp, gsD
 
 # Interactive volcano plot.
 
-deVolcanoInt <- function(limmaResults, 
+deVolcanoInt <- function(ns, 
                        plotContrast = NULL, 
                        y.var = c("p.value", "q.value"),
                        pval_cutoff = 0.05,
                        logfc_cutoff = 0) {
+  
+  limmaResults <- ns$deRes
   
   # Bind local variables
   log2FC <- log10p <- NULL

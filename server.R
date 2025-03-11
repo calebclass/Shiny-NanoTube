@@ -228,10 +228,12 @@ shinyServer(
     }
     
     pcaPlot <- reactive({ plotPCA(ns()) })
-    deResults <- reactive({ deRes(ns(), input$signif_type, input$pval_cutoff, input$logfc_cutoff) })
+    deResults <- reactive({ deRes(ns(), input$signif_type, 
+                                  input$pval_cutoff, input$logfc_cutoff,
+                                  twoFactor = input$twoFactor) })
     ####
     
-    canoPlot <- reactive({ deVolcanoInt(limmaResults = ns()$deRes,
+    canoPlot <- reactive({ deVolcanoInt(ns(),
                                         plotContrast = input$volComp,
                                         y.var = input$signif_type,
                                         pval_cutoff = input$pval_cutoff,
