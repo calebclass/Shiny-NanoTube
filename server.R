@@ -239,6 +239,22 @@ shinyServer(
                                         pval_cutoff = input$pval_cutoff,
                                         logfc_cutoff = input$logfc_cutoff) })
     
+    canoExport <- reactive({ deVolcanoExport(ns(),
+                                         plotContrast = input$volComp,
+                                         y.var = input$signif_type,
+                                         pval_cutoff = input$pval_cutoff,
+                                         logfc_cutoff = input$logfc_cutoff,
+                                         maxOverlaps = input$maxOverlaps,
+                                         twoFactor = input$twoFactor) })
+      
+    
+    deBarsExport <- reactive({ deBargraphExport(ns(),
+                                         plotContrast = NULL,
+                                         y.var = input$signif_type,
+                                         pval_cutoff = input$pval_cutoff,
+                                         logfc_cutoff = input$logfc_cutoff,
+                                         twoFactor = input$twoFactor)  })
+    
     ###
     
     output$posTab <- renderDataTable({ posQC()$DT })
@@ -289,12 +305,34 @@ shinyServer(
       }
     )
     
-    ###
+
     output$canoPlot <- renderPlotly({
       req(ns())
       canoPlot()
       })
-    ###
+    
+    output$canoDownload <- downloadHandler(
+      filename = function() {"volcano_plot.tiff"},
+      content = function(file) {
+        ggsave(file, plot = canoExport(),
+               height = input$volcanoHeight, width = input$volcanoWidth,
+               units = "px")
+      }
+    )
+    
+    output$deBarsDownload <- downloadHandler(
+      filename = function() {"de_bargraphs.jpg"},
+      content = function(file) {
+        
+        plot_data <- deBarsExport()
+        ggsave(file, plot = plot_data$plt,
+               height = 550 * ceiling(plot_data$num_plots/4), width = 2000,
+               units = "px",
+               device = "jpeg")
+      },
+      contentType = "image/jpeg"
+    )
+    
     output$NANOdownload <- downloadHandler(
       filename = function() {"nanoTable.csv"},
       content = function(file) {
