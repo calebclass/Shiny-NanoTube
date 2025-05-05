@@ -469,6 +469,75 @@ deVolcanoInt <- function(ns,
   
 }
 
+# Export volcano plot. Will label DE genes (standard), or uniquely DE genes 
+# (two-factor mode).
+
+deVolcanoExport <- function(ns, 
+                         plotContrast = NULL, 
+                         y.var = c("p.value", "q.value"),
+                         pval_cutoff = 0.05,
+                         logfc_cutoff = 0,
+                         maxOverlaps = 10,
+                         twoFactor = FALSE) {
+  
+  limmaResults <- ns$deRes
+  
+  # Identify contrast if not provided
+  if (is.null(plotContrast)) {
+    plotContrast <-
+      colnames(limmaResults$coefficients)[
+        which(!(colnames(limmaResults) %in% 
+                  c("Intercept", "(Intercept)")))[1]]
+    
+    cat("\n'plotContrast' not provided, setting it to", plotContrast, "\n")
+  }
+  
+  # Set up data frame for plot
+  df <- data.frame(log2FC = limmaResults$coefficients[,plotContrast],
+                   log10p = -log10(limmaResults[[y.var[1]]][,plotContrast]),
+                   name = limmaResults$genes$Name)
+  
+  if (twoFactor) {
+    limmaControl <- ns$deRes.control
+    
+    df$log2FC.control <- limmaControl$coefficients[,plotContrast]
+    df$log10p.control <-  -log10(limmaControl[[y.var[1]]][,plotContrast])
+    
+    # Label genes uniquely differentially expressed in Treatment. 
+    # Either not significantly differentially expressed in control, or 
+    # differentially expressed in opposite direction.
+    df$DE <- abs(df$log2FC) > logfc_cutoff &
+      df$log10p > -log10(pval_cutoff) &
+      (abs(df$log2FC.control) <= logfc_cutoff | df$log10p.control <= -log10(pval_cutoff) |
+         df$log2FC * df$log2FC.control < 0)
+  
+  } else {
+    
+    df$DE <- abs(df$log2FC) > logfc_cutoff &
+      df$log10p > -log10(pval_cutoff)
+    
+  }
+  
+  ggplot(df, aes(x = log2FC, y = log10p)) +
+    geom_point(aes(color = DE, shape = DE)) +
+    ggrepel::geom_text_repel(data = df[df$DE,], aes(label = name),
+                             force = 1, force_pull = 5,
+                             max.overlaps = maxOverlaps) +
+    geom_hline(yintercept =  -log10(pval_cutoff), linetype =  "dotted", 
+               size = 1, colour = 'grey') +
+    geom_vline(xintercept = logfc_cutoff, linetype = "dotted", 
+               size = 1, colour = "grey", ) +
+    geom_vline(xintercept = -logfc_cutoff, linetype = "dotted", 
+               size = 1, colour = "grey") +
+    xlab("log2(Fold Change)") +
+    ylab(paste0("-log10(", substr(y.var[1], 1, 1), ")")) +
+    scale_color_manual(values = c("grey", "#0000C0")) +
+    guides(color = FALSE, shape = FALSE) +
+    theme_classic()
+  
+  
+}
+
 # Positive control summary plots.
 
 prepPosOutputs <- function(posQC) {
@@ -503,5 +572,116 @@ HKscatter <- function(ns) {
     theme_bw()
   
   return(plt)
+}
+
+
+# Generate expression bargraphs of DE genes.
+
+deBargraphExport <- function(ns, 
+                            plotContrasts = NULL, 
+                            y.var = c("p.value", "q.value"),
+                            pval_cutoff = 0.05,
+                            logfc_cutoff = 0,
+                            twoFactor = FALSE) {
+  
+  # Get log2FC + se for each comparison  
+  # https://r-graph-gallery.com/4-barplot-with-error-bar.html
+  limmaResults <- ns$deRes
+  limmaResults$st.error <- sqrt(limmaResults$s2.post) * limmaResults$stdev.unscaled
+ # eset <- ns$dat
+  
+  # Identify contrast if not provided
+  # This would generally be a vector of contrasts (default all except intercept)
+  if (is.null(plotContrasts)) {
+    plotContrasts <-
+      colnames(limmaResults$coefficients)[
+        which(!(colnames(limmaResults) %in% 
+                  c("Intercept", "(Intercept)")))]
+  }
+  
+  pvals.trt <- limmaResults[[y.var[1]]][,plotContrasts]
+  coefs.trt <- limmaResults$coefficients[,plotContrasts]
+  sterr.trt <- limmaResults$st.error[,plotContrasts]
+
+  # For bargraphs, we need the long version of the logFC coefficients and standard errors
+  coefs.df <- as.data.frame(coefs.trt)
+  coefs.df$Gene <- rownames(coefs.df)
+  bargraph.df <- cbind(tidyr::pivot_longer(coefs.df, -Gene, names_to="Comparison",
+                                    values_to="log2FC"),
+                       tidyr::pivot_longer(as.data.frame(sterr.trt), everything(), names_to="cmp",
+                                    values_to="std_err")[,-1])
+  bargraph.df$Group <- "Treatment"
+  
+  
+  
+  
+#  df <- data.frame(log2FC = limmaResults$coefficients[,plotContrast],
+#                   log10p = -log10(limmaResults[[y.var[1]]][,plotContrast]),
+#                   name = limmaResults$genes$Name)
+  
+  if (twoFactor) {
+    limmaControl <- ns$deRes.control
+    limmaControl$st.error <- sqrt(limmaControl$s2.post) * limmaControl$stdev.unscaled
+    pvals.ctr <- limmaControl[[y.var[1]]][,plotContrasts]
+    coefs.ctr <- limmaControl$coefficients[,plotContrasts]
+    sterr.ctr <- limmaControl$st.error[,plotContrasts]
+    
+    coefs.ctr.df <- as.data.frame(coefs.ctr)
+    coefs.ctr.df$Gene <- rownames(coefs.ctr.df)
+    bargraph.ctr <- cbind(tidyr::pivot_longer(coefs.ctr.df, -Gene, names_to="Comparison",
+                                      values_to="log2FC"),
+                         tidyr::pivot_longer(as.data.frame(sterr.ctr), everything(), names_to="cmp",
+                                      values_to="std_err")[,-1])
+    bargraph.ctr$Group <- "Control"
+    
+    bargraph.df <- rbind(bargraph.df, bargraph.ctr)
+
+    # In each comparison, identify genes DE in treatment but not control
+    # Either not significantly differentially expressed in control, or 
+    # differentially expressed in opposite direction.
+    de.genes <- sapply(plotContrasts, function(contrast) {
+      rownames(pvals.trt)[abs(coefs.trt[,contrast]) > logfc_cutoff &
+                pvals.trt[,contrast] < pval_cutoff &
+                (abs(coefs.ctr[,contrast]) <= logfc_cutoff | pvals.ctr[,contrast] >= pval_cutoff |
+                coefs.trt[,contrast] * coefs.ctr[,contrast] < 0)]
+    })
+    de.combined <- unique(unlist(de.genes))
+    
+    bargraph.DE <- bargraph.df |> dplyr::filter(Gene %in% de.combined)
+    plt <- ggplot(bargraph.DE, aes(x=Comparison, fill = Group)) +
+      geom_col(aes(y=log2FC), position=position_dodge(), width = 0.8, color = "black") +
+      geom_hline(yintercept = 0) +
+      geom_errorbar(aes(ymin = log2FC-std_err, ymax=log2FC+std_err), position=position_dodge(width=0.8), width = 0.3) +
+      facet_wrap(~Gene, scales = 'fixed', axes = "all", ncol=4) +
+      scale_fill_manual(values = c("gray", "black")) +
+      xlab("") + ylab("log2 Fold Change") + 
+      ggthemes::theme_tufte() +
+      theme(axis.line=element_line())
+      
+    
+    
+  } else {
+    
+    de.genes <- sapply(plotContrasts, function(contrast) {
+      rownames(pvals.trt)[abs(coefs.trt[,contrast]) > logfc_cutoff &
+                            pvals.trt[,contrast] < pval_cutoff]
+    })
+    de.combined <- unique(unlist(de.genes))
+    
+    bargraph.DE <- bargraph.df |> dplyr::filter(Gene %in% de.combined)
+    plt <- ggplot(bargraph.DE, aes(x=Comparison)) +
+      geom_col(aes(y=log2FC), width = 0.8, color = "black", fill = "black") +
+      geom_hline(yintercept = 0) +
+      geom_errorbar(aes(ymin = log2FC-std_err, ymax=log2FC+std_err), width = 0.3) +
+      facet_wrap(~Gene, scales = 'fixed', axes = "all", ncol=4) +
+      xlab("") + ylab("log2 Fold Change") + 
+      ggthemes::theme_tufte() +
+      theme(axis.line=element_line())
+    
+    
+  }
+  
+  return(list(plt=plt, num_plots = length(de.combined)))
+   
 }
 

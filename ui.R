@@ -351,16 +351,25 @@ dashboardPage(skin = "blue",
                                      numericInput('pval_cutoff','p/q-val cutoff', value = 0.05, min = 0, max = 1),
                                      
                                      plotlyOutput("canoPlot"),
+                                     downloadButton("canoDownload","Download Image"),
+                                     numericInput('volcanoHeight','Figure Height (pixels)', value = 1500, min = 0, max = 6000),
+                                     numericInput('volcanoWidth','Figure Width (pixels)', value = 1500, min = 0, max = 6000),
+                                     numericInput('maxOverlaps', 'Maximum Overlaps (labels)', value = 10, min = 1, max = Inf),
                                      
-                                     tableOutput("deCounts"))
-                                   ),
+                                     h4("Bargraphs of DE Genes"),
+                                     downloadButton("deBarsDownload","Download Image")
+                                    
+                                   )),
                             column(width = 7,
                                    
                                    box(
                                      title = "Full Results", width = NULL,
                                      
                                      DTOutput("deTab"),
-                                     downloadButton("DEdownload","Download Table")
+                                     downloadButton("DEdownload","Download Table"),
+                                     
+                                     br(),
+                                     tableOutput("deCounts")
                                    )
                             ))
                           
