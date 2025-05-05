@@ -240,6 +240,9 @@ shinyServer(
                                         logfc_cutoff = input$logfc_cutoff) })
     
     ###
+    hkScatterPlot <- reactive({ HKscatter(ns()) })
+    
+    ###
     
     output$posTab <- renderDataTable({ posQC()$DT })
     output$posPlot <- renderPlotly({ posQC()$plotly })
@@ -302,7 +305,11 @@ shinyServer(
       }
     )
     
-    
+    ###
+    output$hkScatterPlot <- renderPlotly({
+      req(ns())
+      ggplotly(hkScatterPlot(),tooltip="text")
+    })
     
     
    ####
@@ -383,9 +390,14 @@ shinyServer(
       plotlyHeatmap(ns(), groupedGenesets()[,1:9], leadingEdge(), input$gsClust, input$gsComp, input$gsDir)
     })
     ############
-    
 
-  
     
+    output$qcSummary <- renderDataTable({ cbind(ns()$dat.list$qc,
+                                                "Pos. Control Scale Factor"=posQC()$DT$x$data[,2],
+                                                "Pos. Control R Squared"=posQC()$DT$x$data[,3],
+                                                "Neg. Control Mean"=negQC()$tab[,1],
+                                                "Genes Below BG (%)"=negQC()$tab[,5],
+                                                "Housekeeping Scale Factor"=hkQC()$tab[,-1]) },options = list(scrollX = TRUE))
+
   }
 )
