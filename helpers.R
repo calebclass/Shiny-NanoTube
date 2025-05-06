@@ -552,6 +552,28 @@ prepPosOutputs <- function(posQC) {
   return(posQC)
 }
 
+# Housekeeping Scatter
+
+HKscatter <- function(ns) {
+  hkexprs <- log2(ns$dat[ns$dat@featureData@data$CodeClass=="Housekeeping",]@assayData$exprs)
+  # Set up data frame for plot
+  hkdf <- data.frame(hkMean = rowMeans(hkexprs),
+                   hkVar = rowVars(hkexprs),
+                   gene = ns$dat@featureData@data$Name[match(rownames(hkexprs),rownames(ns$dat@featureData@data))])
+  hkdf <- mutate(hkdf, text = paste(
+    "Gene: ", gene,
+    "\nMean: ", round(hkMean,4),
+    "\nVariance: ", round(hkVar,4), sep = ""))
+  
+  plt <- ggplot(hkdf, aes(x = hkMean, y = hkVar, text = text)) +
+    geom_point(size = 4) +
+    xlab("Mean") +
+    ylab("Variance") +
+    theme_bw()
+  
+  return(plt)
+}
+
 
 # Generate expression bargraphs of DE genes.
 
@@ -662,3 +684,4 @@ deBargraphExport <- function(ns,
   return(list(plt=plt, num_plots = length(de.combined)))
    
 }
+

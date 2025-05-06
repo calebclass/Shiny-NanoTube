@@ -5,6 +5,7 @@ library(shinyBS)
 library(shinyjs)
 library(plotly)
 library(DT)
+library(matrixStats)
 
 source("helpers.R")
 ##Add gradient scroll 
@@ -234,13 +235,18 @@ dashboardPage(skin = "blue",
                   
                   tabItem(tabName = "QCres",
                           navbarPage("QC", id = "qc",
+                                     tabPanel("Summary",
+                                              column(width = 12,
+                                                     box(
+                                                       dataTableOutput("qcSummary"),
+                                                       title = "Summary Table", width = NULL)
+                                              )),                                     
                                      tabPanel("Positive Controls",
                                               box(
                                                 column(width = 12, plotlyOutput("posPlot", width = "100%", height = "auto")),
                                                 width = 8,
                                                 title = "Observed-Expected Plots"
                                               ),
-                                              
                                               box(
                                                 dataTableOutput("posTab"),
                                                 width = 4,
@@ -274,8 +280,6 @@ dashboardPage(skin = "blue",
                                                          title = "Negative Target Counts"
                                                        )
                                                 )
-                                                
-                                                
                                               )),
                                      
                                      tabPanel("Housekeeping Genes",
@@ -289,6 +293,11 @@ dashboardPage(skin = "blue",
                                                      box(
                                                        h3("Normalized Data"),
                                                        plotOutput("hkPlot2", width = "100%", height = "auto"),
+                                                       width = NULL
+                                                     ),
+                                                     box(
+                                                       h3("Mean-Variance"),
+                                                       plotlyOutput("hkScatterPlot"),
                                                        width = NULL
                                                      )
                                               ),
@@ -327,6 +336,7 @@ dashboardPage(skin = "blue",
                                                        title = "PCA", width = NULL, 
                                                        plotlyOutput("pcaPlot")
                                                      )))
+
                   )),
                   
                   tabItem(tabName = "AnalysisRes",
