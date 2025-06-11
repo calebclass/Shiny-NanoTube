@@ -582,7 +582,8 @@ deBargraphExport <- function(ns,
                             y.var = c("p.value", "q.value"),
                             pval_cutoff = 0.05,
                             logfc_cutoff = 0,
-                            twoFactor = FALSE) {
+                            twoFactor = FALSE,
+                            plot_output = c("compressed", "facet_wrap")) {
   
   # Get log2FC + se for each comparison  
   # https://r-graph-gallery.com/4-barplot-with-error-bar.html
@@ -648,17 +649,37 @@ deBargraphExport <- function(ns,
     de.combined <- unique(unlist(de.genes))
     
     bargraph.DE <- bargraph.df |> dplyr::filter(Gene %in% de.combined)
-    plt <- ggplot(bargraph.DE, aes(x=Comparison, fill = Group)) +
-      geom_col(aes(y=log2FC), position=position_dodge(), width = 0.8, color = "black") +
-      geom_hline(yintercept = 0) +
-      geom_errorbar(aes(ymin = log2FC-std_err, ymax=log2FC+std_err), position=position_dodge(width=0.8), width = 0.3) +
-      facet_wrap(~Gene, scales = 'fixed', axes = "all", ncol=4) +
-      scale_fill_manual(values = c("gray", "black")) +
-      xlab("") + ylab("log2 Fold Change") + 
-      ggthemes::theme_tufte() +
-      theme(axis.line=element_line())
-      
     
+    if (plot_output == "facet_wrap") {
+      plt <- ggplot(bargraph.DE, aes(x=Comparison, fill = Group)) +
+        geom_col(aes(y=log2FC), position=position_dodge(), width = 0.8, color = "black") +
+        geom_hline(yintercept = 0) +
+        geom_errorbar(aes(ymin = log2FC-std_err, ymax=log2FC+std_err), position=position_dodge(width=0.8), width = 0.3) +
+        facet_wrap(~Gene, scales = 'fixed', axes = "all", ncol=4) +
+        scale_fill_manual(values = c("gray", "black")) +
+        xlab("") + ylab("log2 Fold Change") + 
+        ggthemes::theme_tufte() +
+        theme(axis.line=element_line())
+    } else {
+      ymax <- max(bargraph.DE$log2FC+bargraph.DE$std_err)
+      ymin <- min(bargraph.DE$log2FC-bargraph.DE$std_err)
+      
+      plt <- lapply(de.combined, function(gene_i) {
+        bargraph.DE |> dplyr::filter(Gene == gene_i) |>
+        ggplot(aes(x=Comparison, fill = Group)) +
+          geom_col(aes(y=log2FC), position=position_dodge(), width = 0.8, color = "black") +
+          geom_hline(yintercept = 0) +
+          geom_errorbar(aes(ymin = log2FC-std_err, ymax=log2FC+std_err), position=position_dodge(width=0.8), width = 0.3) +
+          scale_fill_manual(values = c("gray90", "grey30")) +
+          xlab("") + ylab("log2 Fold Change") + 
+          ylim(ymin, ymax) +
+          ggthemes::theme_tufte() +
+          theme(axis.line=element_line()) +
+          ggtitle(gene_i)
+      })
+      names(plt) <- de.combined
+    }
+
     
   } else {
     
@@ -667,17 +688,35 @@ deBargraphExport <- function(ns,
                             pvals.trt[,contrast] < pval_cutoff]
     })
     de.combined <- unique(unlist(de.genes))
-    
     bargraph.DE <- bargraph.df |> dplyr::filter(Gene %in% de.combined)
-    plt <- ggplot(bargraph.DE, aes(x=Comparison)) +
-      geom_col(aes(y=log2FC), width = 0.8, color = "black", fill = "black") +
-      geom_hline(yintercept = 0) +
-      geom_errorbar(aes(ymin = log2FC-std_err, ymax=log2FC+std_err), width = 0.3) +
-      facet_wrap(~Gene, scales = 'fixed', axes = "all", ncol=4) +
-      xlab("") + ylab("log2 Fold Change") + 
-      ggthemes::theme_tufte() +
-      theme(axis.line=element_line())
     
+    if (plot_output == "facet_wrap") {
+      plt <- ggplot(bargraph.DE, aes(x=Comparison)) +
+        geom_col(aes(y=log2FC), width = 0.8, color = "black", fill = "black") +
+        geom_hline(yintercept = 0) +
+        geom_errorbar(aes(ymin = log2FC-std_err, ymax=log2FC+std_err), width = 0.3) +
+        facet_wrap(~Gene, scales = 'fixed', axes = "all", ncol=4) +
+        xlab("") + ylab("log2 Fold Change") + 
+        ggthemes::theme_tufte() +
+        theme(axis.line=element_line())
+    } else {
+      ymax <- max(bargraph.DE$log2FC+bargraph.DE$std_err)
+      ymin <- min(bargraph.DE$log2FC-bargraph.DE$std_err)
+      
+      plt <- lapply(de.combined, function(gene_i) {
+        bargraph.DE |> dplyr::filter(Gene == gene_i) |>
+          ggplot(bargraph.DE, aes(x=Comparison)) +
+          geom_col(aes(y=log2FC), width = 0.8, color = "black", fill = "grey90") +
+          geom_hline(yintercept = 0) +
+          geom_errorbar(aes(ymin = log2FC-std_err, ymax=log2FC+std_err), width = 0.3) +
+          xlab("") + ylab("log2 Fold Change") + 
+          ylim(ymin, ymax) +
+          ggthemes::theme_tufte() +
+          theme(axis.line=element_line()) +
+          ggtitle(gene_i)
+      })
+      names(plt) <- de.combined
+    }
     
   }
   

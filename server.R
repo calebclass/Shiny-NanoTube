@@ -253,7 +253,8 @@ shinyServer(
                                          y.var = input$signif_type,
                                          pval_cutoff = input$pval_cutoff,
                                          logfc_cutoff = input$logfc_cutoff,
-                                         twoFactor = input$twoFactor)  })
+                                         twoFactor = input$twoFactor,
+                                         plot_output = "compressed")  })
     
     ###
     hkScatterPlot <- reactive({ HKscatter(ns()) })
@@ -323,18 +324,42 @@ shinyServer(
       }
     )
     
+    # output$deBarsDownload <- downloadHandler(
+    #   filename = function() {"de_bargraphs.jpg"},
+    #   content = function(file) {
+    #     
+    #     plot_data <- deBarsExport()
+    #     ggsave(file, plot = plot_data$plt,
+    #            height = 550 * ceiling(plot_data$num_plots/4), width = 2000,
+    #            units = "px",
+    #            device = "jpeg")
+    #   },
+    #   contentType = "image/jpeg"
+    # )
+    
     output$deBarsDownload <- downloadHandler(
-      filename = function() {"de_bargraphs.jpg"},
-      content = function(file) {
-        
-        plot_data <- deBarsExport()
-        ggsave(file, plot = plot_data$plt,
-               height = 550 * ceiling(plot_data$num_plots/4), width = 2000,
-               units = "px",
-               device = "jpeg")
+      filename = function() {
+        paste0("deBars_", Sys.Date(), ".zip")
       },
-      contentType = "image/jpeg"
+      content = function(file) {
+        # Create a temporary directory
+        tmpdir <- tempdir()
+        files <- c()
+        plot_data <- deBarsExport()
+        
+        # Save each plot as a PNG file in the temp directory
+        for (name in names(plot_data$plt)) {
+          plotfile <- file.path(tmpdir, paste0("de_", gsub("\\/", "_", name), ".png"))
+          ggsave(plotfile, plot = plot_data$plt[[name]], 
+                 width = 5, height = 4, bg = "white")
+          files <- c(files, plotfile)
+        }
+        
+        # Create the zip file
+        zip::zip(zipfile = file, files = files, mode = "cherry-pick")
+      }
     )
+    
     
     output$NANOdownload <- downloadHandler(
       filename = function() {"nanoTable.csv"},
